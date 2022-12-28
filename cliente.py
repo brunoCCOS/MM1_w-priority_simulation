@@ -1,33 +1,35 @@
-from simulation import Clock
 import numpy as np
 class Client():
     '''
     Classe para manipulação do freguês
     '''
     id = 0
-    def __init__(self,fila):
-        self.id = Client.id
-        Client.id += 1
+    def __init__(self,fila,time,_id = None):
+        if not _id:
+            _id = Client.id
+            Client.id += 1
+        self.id = _id
         self.served_time = 0 #tempo servido
         self.queue_time = 0 #tempo na fila
         self.queue = fila #fila que se encontra
-        self.last_arrivel_time = Clock.get_time() #instante da ultima vez que entrou na fila
+        self.last_arrival_time = time #instante da ultima vez que entrou na fila
         self.total_time = 0
         self.service_residual = np.inf
-    
-    def get_in_server(self,service):
+        self.last_start_served_time = np.inf#instante da ultima vez que entrou no servidor
+    def get_in_server(self,service,time):
         '''
         Define o inicio do atendimento do fregues
         '''
-        self.last_start_served_time = Clock.get_time() 
-        self.queue_time += Clock.get_time() - self.last_arrivel_time
-        self.service_residual = service
-    def leave_server(self):
+        self.last_start_served_time = time
+        self.queue_time += time - self.last_arrival_time
+        if self.service_residual == np.inf:
+            self.service_residual = service
+    def leave_server(self,time):
         '''
         Retira o fregues da fila e retorna o tempo servido
         '''
-        self.served_time = Clock.get_time() - self.last_start_served_time
-        self.last_arrivel_time = Clock.get_time()#Reinicia o ultimo instante na fila
+        self.served_time = time - self.last_start_served_time
+        self.last_arrival_time = time#Reinicia o ultimo instante na fila
         self.service_residual -= self.served_time
         return self.served_time
     def change_queue(self,queue):
@@ -40,10 +42,11 @@ class Client():
         Retorna prioridade do fregues
         '''
         return self.queue
-    def leave_queue(self):
+    def leave_queue(self,time):
         '''
         Encerra ciclo do freguês na fila
         '''
+        self.leave_server(time)
         self.total_time = self.queue_time + self.served_time
     def get_total_time(self):
         '''
@@ -65,3 +68,8 @@ class Client():
         Retorna tempo de serviço residual
         '''
         return self.service_residual
+    def get_estimated_finish(self):
+        '''
+        Retorna o instante t que o serviço deve acabar caso não seja interrompido
+        '''
+        return self.service_residual + self.last_start_served_time

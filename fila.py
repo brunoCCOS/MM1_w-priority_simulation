@@ -1,30 +1,34 @@
 from cliente import Client
+import numpy as np
+rng = np.random.default_rng(42)
+
 class Fila:
     '''
     Classe de objetos do tipo Fila para simulação de ação e suass propriedades
     '''
     filas = [] # lista com todas as filas
-    def __init__(self,busy,service,priority):
+    def __init__(self,busy,priority):
         self.id = len(Fila.filas) + 1 #1-index base
         self.busy_time = busy #parametro rho
         self.priority_order = priority #prioridade da fila
-        self.arrivel_time = busy/2 #tempo de chegada
+        self.arrival_time = busy/2 #tempo de chegada
         self.queue = []
         self.number_customers = 0
-        Fila.fila.append(self)
-    def arrive_customer(self):
+        Fila.filas.append(self)
+    def arrive_customer(self,time):
         '''
         Anuncia chegada de novo freguês na fila
         '''
-        customer = Client(self.id)
+        customer = Client(self.id,time)
         self.number_customers += 1
         self.queue.append(customer)
-    def kick_out(self,customer):
+        return customer
+    def kick_out(self,customer,time):
         '''
-        Anuncia para a fila que um dos seus fregueses foi expulso do servidor
+        Anuncia para a fila que um dos seus fregueses foi expulso do servidor e retorna ele para primeira posição
         '''
         self.queue.insert(0,customer)
-        customer.leave_server()
+        customer.leave_server(time)
         self.number_customers += 1
     def consume_costumer(self):
         '''
@@ -35,11 +39,15 @@ class Fila:
         self.queue.pop(0)
         return customer
     def get_next(self):
-        '''R
+        '''
         Retorna o próximo fregues da fila
         '''
-        return self.queue[0]
-    def repass_costumer(self,costumer):
-        costumer.leave_server()
-        costumer.leave_queue()
-        return costumer
+        if self.queue:
+            next = self.queue[0]
+        else:
+            next = None
+        return next
+    def get_next_arrival_time(self,time):
+        arrival = rng.exponential(scale=1/self.arrival_time) #Gera o tempo de serviço do cliente
+        print(arrival)
+        return time + arrival
