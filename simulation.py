@@ -51,5 +51,17 @@ class Manager():
             #Calcula e verifica quando deve terminar p encerrar o serviço
             finish_time = round(current.get_estimated_finish()) 
 
-            if self.clock.get_time() == finish_time:
+            if self.clock.get_time() == finish_time: #se tiver terminado o serviço
+                current = service.get_current()
+                print(f'{current.get_id()}:{current} terminou')
                 service.end_service(self.clock.get_time())
+                self.handle_costumer(current) #trata o fregues finalizado
+
+    def handle_costumer(self,costumer):
+        '''
+        Serviço de tratamento do freguês após deixar o servidor
+        '''
+        if costumer.get_priority()<len(Fila.filas):# se não for da última fila
+            queue = Fila.filas[costumer.get_priority()]
+            print(f'{costumer.get_id()} indo pra fila 2')
+            queue.insert_costumer(self.clock.get_time(),costumer.get_id())

@@ -5,10 +5,11 @@ class Client():
     '''
     id = 0
     def __init__(self,fila,time,_id = None):
-        if not _id:
-            _id = Client.id
-            Client.id += 1
-        self.id = _id
+        if _id is None:
+            self.id = int(Client.id)
+            Client.id += 1  
+        else:
+            self.id = _id
         self.served_time = 0 #tempo servido
         self.queue_time = 0 #tempo na fila
         self.queue = fila #fila que se encontra
@@ -73,3 +74,8 @@ class Client():
         Retorna o instante t que o serviço deve acabar caso não seja interrompido
         '''
         return self.service_residual + self.last_start_served_time
+    def get_id(self):
+        '''
+        Retorna o id do freguês
+        '''
+        return self.id
