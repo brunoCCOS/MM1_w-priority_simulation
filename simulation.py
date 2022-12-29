@@ -53,4 +53,3 @@ class Manager():
 
             if self.clock.get_time() == finish_time:
                 service.end_service(self.clock.get_time())
-                print(f'Fregues {current.id} saiu do servidor')

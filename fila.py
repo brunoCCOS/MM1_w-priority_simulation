@@ -1,6 +1,6 @@
 from cliente import Client
 import numpy as np
-rng = np.random.default_rng(42)
+rng = np.random.default_rng()
 
 class Fila:
     '''
@@ -48,6 +48,14 @@ class Fila:
             next = None
         return next
     def get_next_arrival_time(self,time):
+        '''
+        Programa a próxima chegada na fila
+        '''
         arrival = rng.exponential(scale=1/self.arrival_time) #Gera o tempo de serviço do cliente
-        print(arrival)
         return time + arrival
+    
+    def get_queue(self):
+        '''
+        Retorna a lista de fregueses na fila
+        '''
+        return self.queue

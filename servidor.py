@@ -3,7 +3,7 @@ import numpy as np
 import simulation
 from cliente import Client
 from fila import Fila
-rng = np.random.default_rng(42)
+rng = np.random.default_rng()
 
 class Service:
     '''
@@ -51,4 +51,16 @@ class Service:
         return current_
         
     def get_current(self):
+        '''
+        Retorna o fregues atual
+        '''
         return self.current
+
+    def is_busy(self):
+        '''
+        Retorna o status do servidor se está ocupado ou não
+        '''
+        if self.current is not None:
+            return True
+        else:
+            return False 
