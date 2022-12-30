@@ -31,7 +31,17 @@ class Manager():
     '''
     def __init__(self,clock):
         self.clock = clock
-
+        self.records = dict({
+            'W1':[],
+            'W2':[],
+            'W':[],
+            'S1':[],
+            'S2':[],
+            'S':[],
+            'T1':[],
+            'T2':[],
+            'T':[]
+        })
     def handle_queue(self,fila,service):
         '''
         Serviço de verificação e tratamento das pendencias das filas de espera
@@ -53,7 +63,6 @@ class Manager():
 
             if self.clock.get_time() == finish_time: #se tiver terminado o serviço
                 current = service.get_current()
-                print(f'{current.get_id()}:{current} terminou')
                 service.end_service(self.clock.get_time())
                 self.handle_costumer(current) #trata o fregues finalizado
 
@@ -63,5 +72,27 @@ class Manager():
         '''
         if costumer.get_priority()<len(Fila.filas):# se não for da última fila
             queue = Fila.filas[costumer.get_priority()]
-            print(f'{costumer.get_id()} indo pra fila 2')
+            #Salva as métricas da fila 1
+            self.records['W1'].append(costumer.get_queue_time())
+            self.records['S1'].append(costumer.get_served_time())
+            self.records['T1'].append(self.records['W1'][costumer.get_id()] + self.records['S1'][costumer.get_id()])
             queue.insert_costumer(self.clock.get_time(),costumer.get_id())
+        else:
+            #Calcula as métricas da fila 2 e final
+            self.records['W2'].append(costumer.get_queue_time())
+            self.records['S2'].append(costumer.get_served_time())
+            self.records['T2'].append(self.records['W2'][costumer.get_id()] + self.records['S2'][costumer.get_id()])
+            self.records['W'].append(self.records['W1'][costumer.get_id()] + self.records['W2'][costumer.get_id()])
+            self.records['S'].append(self.records['S2'][costumer.get_id()] + self.records['S1'][costumer.get_id()])
+            self.records['T'].append(self.records['W'][costumer.get_id()] + self.records['S'][costumer.get_id()])
+    
+    def get_records(self):
+        '''
+        Retorna histórico de coleta dos fregueses
+        '''
+        return self.records
+    
+def Statistcs():
+    '''
+    Classe para geração e informe de estatistícas
+    '''

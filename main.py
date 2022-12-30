@@ -5,7 +5,7 @@ from servidor import Service
 import time as tm
 
 
-def run(rho: int, service_rate=3, time_horizon: int = None, debugging=False):
+def run(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stopping_arrival = 10000000):
     # inicializa variaveis de fila e tempo
     clock = Clock()  # Inicia o relógio
 
@@ -28,13 +28,11 @@ def run(rho: int, service_rate=3, time_horizon: int = None, debugging=False):
             # soma 1 para garantir que nao seja gerada uma entrada <0.5
             next_arrival = round(fila1.get_next_arrival_time(timestep+1))
             # e ele arredonde para o timestep atual
-        elif next_arrival == timestep:  # se atingir o tempo da chegada introduzir na fila
+        elif next_arrival == timestep and stopping_arrival>timestep:  # se atingir o tempo da chegada introduzir na fila
             print('----------')
             customer = fila1.arrive_customer(timestep)
             next_arrival = round(fila1.get_next_arrival_time(
                 timestep+1))  # Programa a chegada seguinte
-        manager.handle_queue(fila1, servidor)
-        manager.handle_queue(fila2, servidor)
 
         if debugging:  # Logging para debug do código
 
@@ -51,18 +49,20 @@ def run(rho: int, service_rate=3, time_horizon: int = None, debugging=False):
             if servidor.is_busy():
                 finish_time = round(
                     servidor.get_current().get_estimated_finish())
-                print(f'Servidor: {servidor.get_current().get_id()}, origem fila {servidor.get_current().get_priority()} , fim do serviço em {finish_time}')
+                print(f'Servidor: Freguês {servidor.get_current().get_id()}, fila de origem {servidor.get_current().get_priority()} , fim do serviço em {finish_time}')
             else:
                 print(f'Servidor: vazio')
             tm.sleep(0.5)
 
+        manager.handle_queue(fila1, servidor)
+        manager.handle_queue(fila2, servidor)
         manager.handle_server(servidor)
 
         clock.tick_clock()  # avança unidade de tempo
         if timestep == time_horizon:
             print('Fim da simulação')
+            print(manager.get_records())
             break
 
-
 if __name__ == '__main__':
-    run(0.5, time_horizon=50, debugging=True)
+    run(0.5, time_horizon=50, debugging=True, stopping_arrival= 20)
