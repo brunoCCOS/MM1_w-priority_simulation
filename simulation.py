@@ -1,5 +1,9 @@
 from fila import Fila
 from math import isclose
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import t,chi2
+
 class Clock():
     '''
     classe para controlar e regular passagem de tempo
@@ -40,7 +44,11 @@ class Manager():
             'S':[],
             'T1':[],
             'T2':[],
-            'T':[]
+            'T':[],
+            'Nq1':[],
+            'Nq2':[],
+            'N1':[],
+            'N2':[]
         })
     def handle_queue(self,fila,service):
         '''
@@ -49,9 +57,14 @@ class Manager():
         customer = fila.get_next()
         if customer is not None:
             #Verifica como tratar o próximo da fila
-            status = service.arrive_costumer(customer,self.clock.get_time())
-            return status
-
+            service.arrive_costumer(customer,self.clock.get_time())
+        self.records[f'Nq{fila.id}'].append(fila.get_number_customers())
+        if service.is_busy() and service.get_current().get_priority() == fila.get_id(): # Se o fregues no servidor for da fila o número total no instante será as pessoas na fila de espera mais 1
+            self.records[f'N{fila.id}'].append(fila.get_number_customers()+1)
+        else:# se não entrar o número total será apenas as pessoas na fila
+            self.records[f'N{fila.id}'].append(fila.get_number_customers())
+        # self.records['Nq'].append(self.records['Nq1'][len(self.records['Nq1'])-1] + self.records['Nq2'][len(self.records['Nq2'])-1]) # o número total na fila de espera será a soma dos dois Nq
+        # self.records['N'].append(self.records['N1'][len(self.records['N1'])-1] + self.records['N2'][len(self.records['N2'])-1])# o número total no sistema será a soma dos dois N
     def handle_server(self,service):
         '''
         Serviço de verificação e tratamento das pendencias do servidor
@@ -91,8 +104,71 @@ class Manager():
         Retorna histórico de coleta dos fregueses
         '''
         return self.records
-    
-def Statistcs():
+
+class Statistcs():
     '''
     Classe para geração e informe de estatistícas
     '''
+    def calc_mean(data):
+        '''
+        Calcula a méida de um conjunto de amostras
+        '''
+        return data.mean()
+    
+    def calc_var(data):
+        '''
+        Calcula a variança de um conjunto de amostras
+        '''
+        return data.var()
+    
+    def calc_conf_int(data,conf=0.95,dist = "t"):
+        '''
+        Calcula o intervalo de confiança usando uma distribuição específica
+        '''
+        n = len(data) 
+        dof = n - 1 #graus de liberdade
+        m = data.mean()
+        s = data.std()
+        s2 = data.var()
+        
+        if dist == 't':
+            t_crit = np.abs(t.ppf((1-conf)/2,dof)) #Valor crítico da t-student, faz a inversa da cdf
+            return (m-s*t_crit/np.sqrt(len(data)), 
+                    m+s*t_crit/np.sqrt(len(data)))#Intervalo de confiança usando t-student
+        elif dist == 'chi2':
+            return ((n - 1) * s2 / chi2.ppf(conf / 2, dof),
+                    (n - 1) * s2 / chi2.ppf(1-conf / 2, dof)) #Intervalo de confiança usando chi-square
+
+    def plot_hist(x,title,label_x,label_y,save = False):
+        '''
+        Plota histogram de dados
+        '''
+        # the histogram of the data
+        n, bins, patches = plt.hist(x, 50, density=True, facecolor='g', alpha=0.75)
+
+        if label_x:
+            plt.xlabel(label_x)
+        if label_y:
+            plt.ylabel(label_y)
+        plt.title(title)
+        plt.grid(True)
+        plt.show()
+        if save:
+            plt.savefig(f'img/{title}.png')
+
+    def plot_time_series(x,title,label_x,label_y,save = False):
+        '''
+        Plota histogram de dados
+        '''
+        # the histogram of the data
+        plt.plot(range(len(x)),x)
+
+        if label_x:
+            plt.xlabel(label_x)
+        if label_y:
+            plt.ylabel(label_y)
+        plt.title(title)
+        plt.grid(True)
+        plt.show()
+        if save:
+            plt.savefig(f'img/{title}.png')      

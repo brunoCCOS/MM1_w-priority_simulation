@@ -1,11 +1,11 @@
-from simulation import Clock, Manager
+from simulation import Clock, Manager, Statistcs
 from fila import Fila
 from cliente import Client
 from servidor import Service
 import time as tm
 
 
-def run(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stopping_arrival = 10000000):
+def sim(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stopping_arrival = 10000000):
     # inicializa variaveis de fila e tempo
     clock = Clock()  # Inicia o relógio
 
@@ -62,7 +62,8 @@ def run(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stop
         if timestep == time_horizon:
             print('Fim da simulação')
             print(manager.get_records())
+            Statistcs.plot_time_series(manager.get_records()['N2'],'Número de pessoas na fila 1','Tempo','Número de pessoas')
             break
 
 if __name__ == '__main__':
-    run(0.5, time_horizon=50, debugging=True, stopping_arrival= 20)
+    sim(0.5, time_horizon=50, debugging=True)

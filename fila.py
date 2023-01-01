@@ -63,7 +63,16 @@ class Fila:
         arrival = rng.exponential(scale=1/self.arrival_time) #Gera o tempo de serviço do cliente
         print(arrival)
         return time + arrival
-    
+    def get_number_customers(self):
+        '''
+        Retorna o número de pessoas na fila
+        '''
+        return self.number_customers
+    def get_id(self):
+        '''
+        Retorna o id da fila
+        '''
+        return self.id
     def get_queue(self):
         '''
         Retorna a lista de fregueses na fila
