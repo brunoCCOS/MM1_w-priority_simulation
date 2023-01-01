@@ -79,3 +79,9 @@ class Client():
         Retorna o id do freguês
         '''
         return self.id
+    
+    def reset():
+        '''
+        Retorna o estado inicial da classe
+        '''
+        Client.id = 0

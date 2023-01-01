@@ -61,7 +61,6 @@ class Fila:
         Programa a próxima chegada na fila
         '''
         arrival = rng.exponential(scale=1/self.arrival_time) #Gera o tempo de serviço do cliente
-        print(arrival)
         return time + arrival
     def get_number_customers(self):
         '''
@@ -78,3 +77,9 @@ class Fila:
         Retorna a lista de fregueses na fila
         '''
         return self.queue
+    
+    def reset():
+        '''
+        Retorna o estado inicial da classe
+        '''
+        Fila.filas = []

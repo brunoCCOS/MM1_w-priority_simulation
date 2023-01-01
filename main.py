@@ -3,12 +3,13 @@ from fila import Fila
 from cliente import Client
 from servidor import Service
 import time as tm
-
+import numpy as np
 
 def sim(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stopping_arrival = 10000000):
     # inicializa variaveis de fila e tempo
     clock = Clock()  # Inicia o relógio
-
+    Fila.reset() #Reinicia globais das classes
+    Client.reset()#Reinicia globais das classes
     next_arrival = 0
     end_service = 0
     finish_time = None
@@ -29,7 +30,6 @@ def sim(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stop
             next_arrival = round(fila1.get_next_arrival_time(timestep+1))
             # e ele arredonde para o timestep atual
         elif next_arrival == timestep and stopping_arrival>timestep:  # se atingir o tempo da chegada introduzir na fila
-            print('----------')
             customer = fila1.arrive_customer(timestep)
             next_arrival = round(fila1.get_next_arrival_time(
                 timestep+1))  # Programa a chegada seguinte
@@ -54,16 +54,22 @@ def sim(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stop
                 print(f'Servidor: vazio')
             tm.sleep(0.5)
 
-        manager.handle_queue(fila1, servidor)
-        manager.handle_queue(fila2, servidor)
-        manager.handle_server(servidor)
+        manager.handle_queue(fila1, servidor)# Trata fila 1
+        manager.handle_queue(fila2, servidor)# Trata fila 2
+        manager.handle_server(servidor)# Trata servidor
 
         clock.tick_clock()  # avança unidade de tempo
         if timestep == time_horizon:
-            print('Fim da simulação')
-            print(manager.get_records())
-            Statistcs.plot_time_series(manager.get_records()['N2'],'Número de pessoas na fila 1','Tempo','Número de pessoas')
-            break
+            # print('Fim da simulação')
+            # print(manager.get_records())
+            # Statistcs.plot_time_series(manager.get_records()['N2'],'Número de pessoas na fila 1','Tempo','Número de pessoas')
+            return manager.get_records()
 
 if __name__ == '__main__':
-    sim(0.5, time_horizon=50, debugging=True)
+    means = np.array([])
+    for simulation in range(100):
+        records = sim(0.5, time_horizon=50, debugging=False)
+        means = np.append(means,np.mean(records['T1']))
+    interval = Statistcs.calc_conf_int(means)
+    print(f'Intervalo de confiança para o Tempo total médio: \n\tlimite inferior:{interval[0]}\n\tlimite superior{interval[1]}')
+    Statistcs.plot_time_series(means,'Médias de tempo nas simulações','Simualção','Tempo médio total')

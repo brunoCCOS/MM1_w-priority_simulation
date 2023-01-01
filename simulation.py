@@ -113,23 +113,28 @@ class Statistcs():
         '''
         Calcula a méida de um conjunto de amostras
         '''
-        return data.mean()
+        return np.mean(data)
     
     def calc_var(data):
         '''
         Calcula a variança de um conjunto de amostras
         '''
-        return data.var()
+        return np.var(data)
     
+    def calc_std(data):
+        '''
+        Calcula o desvio padrão de um conjunto de amostras
+        '''
+        return np.std(data)    
     def calc_conf_int(data,conf=0.95,dist = "t"):
         '''
         Calcula o intervalo de confiança usando uma distribuição específica
         '''
         n = len(data) 
         dof = n - 1 #graus de liberdade
-        m = data.mean()
-        s = data.std()
-        s2 = data.var()
+        m = Statistcs.calc_mean(data)
+        s = Statistcs.calc_std(data)
+        s2 = Statistcs.calc_var(data)
         
         if dist == 't':
             t_crit = np.abs(t.ppf((1-conf)/2,dof)) #Valor crítico da t-student, faz a inversa da cdf
