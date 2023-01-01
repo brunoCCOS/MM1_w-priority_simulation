@@ -5,7 +5,7 @@ from servidor import Service
 import time as tm
 import numpy as np
 
-def sim(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stopping_arrival = 10000000):
+def sim(rho: int, service_rate=1, time_horizon: int = None, debugging=False,stopping_arrival = 10000000):
     # inicializa variaveis de fila e tempo
     clock = Clock()  # Inicia o relógio
     Fila.reset() #Reinicia globais das classes
@@ -68,7 +68,7 @@ def sim(rho: int, service_rate=3, time_horizon: int = None, debugging=False,stop
 if __name__ == '__main__':
     means = np.array([])
     for simulation in range(100):
-        records = sim(0.5, time_horizon=50, debugging=False)
+        records = sim(0.8, time_horizon=30000, debugging=False)
         means = np.append(means,np.mean(records['T1']))
     interval = Statistcs.calc_conf_int(means)
     print(f'Intervalo de confiança para o Tempo total médio: \n\tlimite inferior:{interval[0]}\n\tlimite superior{interval[1]}')
