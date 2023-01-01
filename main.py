@@ -1,4 +1,5 @@
-from simulation import Clock, Manager, Statistcs
+from simulation import Clock, Manager
+from statistcs import Statistcs
 from fila import Fila
 from cliente import Client
 from servidor import Service
@@ -68,8 +69,9 @@ def sim(rho: int, service_rate=1, time_horizon: int = None, debugging=False,stop
 if __name__ == '__main__':
     means = np.array([])
     for simulation in range(100):
-        records = sim(0.8, time_horizon=30000, debugging=False)
-        means = np.append(means,np.mean(records['T1']))
+        records = sim(0.8, time_horizon=1000, debugging=False)
+        means = np.append(means,records['T1'])
     interval = Statistcs.calc_conf_int(means)
     print(f'Intervalo de confiança para o Tempo total médio: \n\tlimite inferior:{interval[0]}\n\tlimite superior{interval[1]}')
     Statistcs.plot_time_series(means,'Médias de tempo nas simulações','Simualção','Tempo médio total')
+    Statistcs.plot_hist(means,'Médias de tempo nas simulações','Simualção','Tempo médio total')
