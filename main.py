@@ -12,7 +12,6 @@ def sim(rho: int, service_rate=1, time_horizon: int = None, debugging=False,stop
     Fila.reset() #Reinicia globais das classes
     Client.reset()#Reinicia globais das classes
     next_arrival = 0
-    end_service = 0
     finish_time = None
 
     fila1 = Fila(rho, 1)
@@ -90,8 +89,8 @@ if __name__ == '__main__':
     })
     means = list()
     for simulation in range(1):
-        records = sim(0.5, time_horizon=1000, debugging=False)
-        for key in records:
+        records = sim(0.5, time_horizon=1000, debugging=True)
+        for key in records: #Appenda os resultados das simulações
             results[key]+=records[key]
         print(records['rho'])
         
