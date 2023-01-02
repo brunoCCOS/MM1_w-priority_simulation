@@ -7,7 +7,7 @@ class Clock():
     classe para controlar e regular passagem de tempo
     '''
     def __init__(self):
-        self.time = 0
+        self.time = 0.0
 
     def tick_clock(self):
         '''
@@ -48,6 +48,7 @@ class Manager():
             'N1':[],
             'N2':[]
         })
+        self.next_event = 0
     def handle_queue(self,fila,service):
         '''
         Serviço de verificação e tratamento das pendencias das filas de espera
@@ -70,7 +71,7 @@ class Manager():
         current = service.get_current() #Recupera cliente atual no servidor
         if current is not None:
             #Calcula e verifica quando deve terminar p encerrar o serviço
-            finish_time = round(current.get_estimated_finish()) 
+            finish_time = current.get_estimated_finish()
 
             if self.clock.get_time() == finish_time: #se tiver terminado o serviço
                 current = service.get_current()
@@ -97,6 +98,19 @@ class Manager():
             self.records['S'].append(self.records['S2'][costumer.get_id()] + self.records['S1'][costumer.get_id()])
             self.records['T'].append(self.records['W'][costumer.get_id()] + self.records['S'][costumer.get_id()])
     
+    def handle_clock(self,fila,servidor):
+        '''
+        Serviço de tratamento do tempo de simulação, verifica qual o próximo evento(fim de serviço ou chegada de fregues) e avança até ele
+        '''
+        prox_chegada = fila.get_next_arrival_time()
+        if servidor.is_busy():
+            fim_servico = servidor.get_current().get_estimated_finish()
+            if fim_servico < prox_chegada:
+                self.clock.set_time(fim_servico)
+            else:
+                self.clock.set_time(prox_chegada)
+        else:
+            self.clock.set_time(prox_chegada)
     def get_records(self):
         '''
         Retorna histórico de coleta dos fregueses

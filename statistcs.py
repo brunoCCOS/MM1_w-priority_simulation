@@ -18,6 +18,18 @@ class Statistcs():
         '''
         return np.var(data)
     
+    def calc_inc_mean(mean,sample,nsamples):
+        '''
+        Calcula a méida de um conjunto de amostras incrementalmente
+        '''
+        return (nsamples*mean + sample)/(nsamples+1)
+    
+    def calc_inc_var(old_mean,var,sample,nsamples):
+        '''
+        Calcula a variança de um conjunto de amostras incrementalmente
+        '''
+        return (nsamples/(nsamples + 1))*(var**2 + ((sample - old_mean)**2)/(nsamples + 1))
+    
     def calc_std(data):
         '''
         Calcula o desvio padrão de um conjunto de amostras
@@ -58,12 +70,12 @@ class Statistcs():
         if save:
             plt.savefig(f'img/{title}.png')
 
-    def plot_time_series(x,title,label_x,label_y,save = False):
+    def plot_scatter(x,title,label_x,label_y,save = False):
         '''
         Plota histogram de dados
         '''
         # the histogram of the data
-        plt.plot(range(len(x)),x)
+        plt.scatter(range(len(x)),x)
 
         if label_x:
             plt.xlabel(label_x)
@@ -75,4 +87,15 @@ class Statistcs():
         if save:
             plt.savefig(f'img/{title}.png')
     
-    # def print_full_statistics(*datas):
+    def print_full_statistics(results,plots = True):
+        for data in results:
+            print(f'Estatisticas a respeito de {data}:')
+            print(f'\t\ esperança: {Statistcs.calc_mean(results[data])}')
+            print(f'\t\ variancia: {Statistcs.calc_var(results[data])}')
+            print(f'\t\ desvio padrão: {Statistcs.calc_std(results[data])}')
+            print(f'\t\ intervalo de confiança para média: {Statistcs.calc_conf_int(results[data])}')
+            print('-'*30)
+            if plots:
+                Statistcs.plot_scatter(results[data],f'Progresso no tempo de {data}','Tempo',f'{data}')
+                Statistcs.plot_hist(results[data],f'Distribuição de {data}','Valores','Frequencia')
+        return

@@ -14,6 +14,7 @@ class Fila:
         self.arrival_time = busy/2 #tempo de chegada
         self.queue = []
         self.number_customers = 0
+        self.next_arrival = None
         Fila.filas.append(self)
     def arrive_customer(self,time):
         '''
@@ -56,12 +57,20 @@ class Fila:
         else:
             next = None
         return next
-    def get_next_arrival_time(self,time):
+    def get_next_arrival_time(self):
+        '''
+        Retorna a próxima chegada configurada
+        '''
+        return self.next_arrival
+    
+    def set_next_arrival_time(self,time):
         '''
         Programa a próxima chegada na fila
         '''
         arrival = rng.exponential(scale=1/self.arrival_time) #Gera o tempo de serviço do cliente
-        return time + arrival
+        self.next_arrival = time + arrival
+        return self.next_arrival
+    
     def get_number_customers(self):
         '''
         Retorna o número de pessoas na fila
