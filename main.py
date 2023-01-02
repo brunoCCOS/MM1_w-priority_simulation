@@ -88,8 +88,8 @@ if __name__ == '__main__':
         'rho':[]
     })
     means = list()
-    for simulation in range(10):
-        records = sim(0.5, time_horizon=1000000, debugging=False)
+    for simulation in range(1000):
+        records = sim(0.5, time_horizon=1000, debugging=False)
         for key in records: #Appenda os resultados das simulações
             results[key]+=records[key]
         # print(records['rho'])

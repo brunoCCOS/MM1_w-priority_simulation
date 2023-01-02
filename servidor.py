@@ -25,7 +25,7 @@ class Service:
         '''
         Função para tratamento da chegada de um novo consumidor
         '''
-        if self.current is None: #Caso a fila esteja vazia
+        if not self.is_busy(): #Caso a fila esteja vazia
             queue_in = Fila.filas[customer.get_queue_id()-1]
             queue_in.consume_costumer()
             self.start_new_costumer(customer,time)

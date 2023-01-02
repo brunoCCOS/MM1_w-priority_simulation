@@ -24,7 +24,7 @@ class Client():
         self.last_start_served_time = time
         self.queue_time += time - self.last_arrival_time
         if self.service_residual == np.inf:
-            self.service_residual = service + 1
+            self.service_residual = service
     def leave_server(self,time):
         '''
         Retira o fregues da fila e retorna o tempo servido
