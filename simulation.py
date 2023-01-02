@@ -46,7 +46,8 @@ class Manager():
             'Nq1':[],
             'Nq2':[],
             'N1':[],
-            'N2':[]
+            'N2':[],
+            'rho':[]
         })
         self.next_event = 0
     def handle_queue(self,fila,service):
@@ -116,3 +117,5 @@ class Manager():
         Retorna histórico de coleta dos fregueses
         '''
         return self.records
+    def set_busy_time(self,time):
+        self.records['rho'].append(sum(self.records['S'])/time)
