@@ -59,7 +59,7 @@ class Manager():
             #Verifica como tratar o próximo da fila
             service.arrive_costumer(customer,self.clock.get_time())
         self.records[f'Nq{fila.id}'].append(fila.get_number_customers())
-        if service.is_busy() and service.get_current().get_priority() == fila.get_id(): # Se o fregues no servidor for da fila o número total no instante será as pessoas na fila de espera mais 1
+        if service.is_busy() and service.get_current().get_queue_id() == fila.get_id(): # Se o fregues no servidor for da fila o número total no instante será as pessoas na fila de espera mais 1
             self.records[f'N{fila.id}'].append(fila.get_number_customers()+1)
         else:# se não entrar o número total será apenas as pessoas na fila
             self.records[f'N{fila.id}'].append(fila.get_number_customers())
@@ -83,8 +83,8 @@ class Manager():
         '''
         Serviço de tratamento do freguês após deixar o servidor
         '''
-        if costumer.get_priority()<len(Fila.filas):# se não for da última fila
-            queue = Fila.filas[costumer.get_priority()]
+        if costumer.get_queue_id()<len(Fila.filas):# se não for da última fila
+            queue = Fila.filas[costumer.get_queue_id()]
             #Salva as métricas da fila 1
             self.records['W1'].append(costumer.get_queue_time())
             self.records['S1'].append(costumer.get_served_time())

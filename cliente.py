@@ -42,7 +42,12 @@ class Client():
         '''
         Retorna prioridade do fregues
         '''
-        return self.queue
+        return self.queue.get_priority()
+    def get_queue_id(self):
+        '''
+        Retorna prioridade do fregues
+        '''
+        return self.queue.get_id()
     def leave_queue(self,time):
         '''
         Encerra ciclo do freguês na fila

@@ -26,13 +26,13 @@ class Service:
         Função para tratamento da chegada de um novo consumidor
         '''
         if self.current is None: #Caso a fila esteja vazia
-            queue_in = Fila.filas[customer.get_priority()-1]
+            queue_in = Fila.filas[customer.get_queue_id()-1]
             queue_in.consume_costumer()
             self.start_new_costumer(customer,time)
             return (0,customer)
         elif self.current.get_priority() > customer.get_priority(): #Caso a prioridade do cliente novo seja maior que a do atual
-            queue_out = Fila.filas[self.current.get_priority()-1]
-            queue_in = Fila.filas[customer.get_priority()-1]
+            queue_out = Fila.filas[self.current.get_queue_id()-1]
+            queue_in = Fila.filas[customer.get_queue_id()-1]
             queue_out.kick_out(self.current,time)
             queue_in.consume_costumer()
             self.start_new_costumer(customer,time)

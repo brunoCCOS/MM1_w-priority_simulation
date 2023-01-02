@@ -88,11 +88,11 @@ if __name__ == '__main__':
         'rho':[]
     })
     means = list()
-    for simulation in range(1):
-        records = sim(0.5, time_horizon=1000, debugging=True)
+    for simulation in range(10):
+        records = sim(0.5, time_horizon=1000000, debugging=False)
         for key in records: #Appenda os resultados das simulações
             results[key]+=records[key]
-        print(records['rho'])
+        # print(records['rho'])
         
         # NOTAS PARA O THIAGOOo
         #PRINTA A PORCENTAGeM DO TEMPO QUE FICA OCUPADO, REPARA QUE QUANDO AUMENTA O TIME_HORIZON O RHO FICA AUMENTANDO MTO, OU SEJA TEM T->inf A FILA ESTOURA, DESCOBRE PQ

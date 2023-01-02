@@ -20,7 +20,7 @@ class Fila:
         '''
         Anuncia chegada de novo freguês na fila
         '''
-        customer = Client(self.id,time)
+        customer = Client(self,time)
         self.number_customers += 1
         self.queue.append(customer)
         return customer
@@ -29,7 +29,7 @@ class Fila:
         Equivalente a arrive_costumer porém dessa vez invés de um 
         cliente novo é inserido um freguês arbitrário
         '''
-        customer = Client(self.id,time,id)
+        customer = Client(self,time,id)
         self.number_customers += 1
         self.queue.append(customer)
         return customer
@@ -86,6 +86,13 @@ class Fila:
         Retorna a lista de fregueses na fila
         '''
         return self.queue
+    
+    def get_priority(self):
+        '''
+        Retorna a prioridade da fila
+        '''
+        return self.priority_order
+    
     
     def reset():
         '''
