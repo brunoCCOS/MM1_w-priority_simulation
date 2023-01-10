@@ -1,6 +1,6 @@
 from fila import Fila
 from math import isclose
-
+import numpy as np
 
 class Clock():
     '''
@@ -47,6 +47,7 @@ class Manager():
             'Nq2':[],
             'N1':[],
             'N2':[],
+            'N': [],
             'rho':[]
         })
         self.next_event = 0
@@ -63,8 +64,7 @@ class Manager():
             self.records[f'N{fila.id}'].append(fila.get_number_customers()+1)
         else:# se não entrar o número total será apenas as pessoas na fila
             self.records[f'N{fila.id}'].append(fila.get_number_customers())
-        # self.records['Nq'].append(self.records['Nq1'][len(self.records['Nq1'])-1] + self.records['Nq2'][len(self.records['Nq2'])-1]) # o número total na fila de espera será a soma dos dois Nq
-        # self.records['N'].append(self.records['N1'][len(self.records['N1'])-1] + self.records['N2'][len(self.records['N2'])-1])# o número total no sistema será a soma dos dois N
+
     def handle_server(self,service):
         '''
         Serviço de verificação e tratamento das pendencias do servidor
@@ -107,11 +107,14 @@ class Manager():
         if servidor.is_busy():
             fim_servico = servidor.get_current().get_estimated_finish()
             if fim_servico < prox_chegada:
-                self.clock.set_time(fim_servico)
+                time = fim_servico
             else:
-                self.clock.set_time(prox_chegada)
+                time = prox_chegada
         else:
-            self.clock.set_time(prox_chegada)
+            time = prox_chegada
+        if time == np.inf:
+            time = self.clock.get_time()
+        self.clock.set_time(time)
     def get_records(self):
         '''
         Retorna histórico de coleta dos fregueses
@@ -119,3 +122,9 @@ class Manager():
         return self.records
     def set_busy_time(self,time):
         self.records['rho'].append(sum(self.records['S'])/time)
+        self.records['N'] = list(np.array(self.records['N1']) + np.array(self.records['N2']))
+    def get_n_customers(self):
+        '''
+        Retorna o número de fregueses que já passaram pelo sistema
+        '''
+        return self.customers

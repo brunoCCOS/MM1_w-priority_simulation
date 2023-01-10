@@ -29,9 +29,10 @@ class Client():
         '''
         Retira o fregues da fila e retorna o tempo servido
         '''
-        self.served_time = time - self.last_start_served_time
+        round_served_time = time - self.last_start_served_time # tempo servido nesse periodo
         self.last_arrival_time = time#Reinicia o ultimo instante na fila
-        self.service_residual -= self.served_time
+        self.service_residual -= round_served_time
+        self.served_time += round_served_time
         return self.served_time
     def change_queue(self,queue):
         '''
@@ -52,7 +53,6 @@ class Client():
         '''
         Encerra ciclo do freguês na fila
         '''
-        self.leave_server(time)
         self.total_time = self.queue_time + self.served_time
     def get_total_time(self):
         '''

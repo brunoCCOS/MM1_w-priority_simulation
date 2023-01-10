@@ -6,7 +6,7 @@ from servidor import Service
 import time as tm
 import numpy as np
 
-def sim(rho: int, service_rate=1, time_horizon: int = None, debugging=False,stopping_arrival = 10000000):
+def sim(rho: int, service_rate=1, max_costumers: int = None, debugging=False):
     # inicializa variaveis de fila e tempo
     clock = Clock()  # Inicia o relógio
     Fila.reset() #Reinicia globais das classes
@@ -14,27 +14,36 @@ def sim(rho: int, service_rate=1, time_horizon: int = None, debugging=False,stop
     next_arrival = 0
     finish_time = None
 
-    fila1 = Fila(rho, 1)
-    fila2 = Fila(rho, 2)
-    customer = None
-    servidor = Service(service_rate)
-    arrive = False
+    fila1 = Fila(rho, 1)#Cria fila 1
+    fila2 = Fila(rho, 2)#Cria fila 2
+    customer = None #cliente inicial
+    servidor = Service(service_rate)#Cria servidor
     
+    #Variaveis para debbug
+    arrive = False
+    server_state = 0
+    empty_time = 0
+    last_time_busy = 0
+    
+    n_fregueses = 0 
     on = True
 
     manager = Manager(clock)
     while on:
         timestep = clock.get_time()
         # Programa a próxima chegada em caso de não existir
-        if not next_arrival:
-            # soma 1 para garantir que nao seja gerada uma entrada <0.5
-            next_arrival = fila1.set_next_arrival_time(timestep)
-            # e ele arredonde para o timestep atual
-        elif next_arrival == timestep and stopping_arrival>timestep:  # se atingir o tempo da chegada introduzir na fila
+        if not next_arrival and max_costumers>n_fregueses:
+            next_arrival = fila1.generate_next_arrival_time(timestep)
+            n_fregueses += 1
+        elif next_arrival == timestep:  # se atingir o tempo da chegada introduzir na fila
             customer = fila1.arrive_customer(timestep)
             arrive = True
-            next_arrival = fila1.set_next_arrival_time(
-                timestep)  # Programa a chegada seguinte
+            if  max_costumers>=n_fregueses:
+                next_arrival = fila1.generate_next_arrival_time(
+                    timestep)  # Programa a chegada seguinte
+                n_fregueses+= 1 # Conta mais um freguês no sistema
+            else:
+                next_arrival = fila1.set_next_arrival_time(np.inf)
         else:
             arrive = False
         manager.handle_server(servidor)# Trata servidor
@@ -57,18 +66,31 @@ def sim(rho: int, service_rate=1, time_horizon: int = None, debugging=False,stop
             if servidor.is_busy():
                 finish_time = servidor.get_current().get_estimated_finish()
                 print(f'Servidor: Freguês {servidor.get_current().get_id()}, fila de origem {servidor.get_current().get_priority()} , fim do serviço em {finish_time}')
+                if server_state != 1:
+                    print('servidor estava vazio e encheu')
+                    empty_time += clock.get_time() - last_time_busy
+                    server_state = 1
             else:
                 print(f'Servidor: vazio')
+                if server_state != 0:
+                    print('servidor estava cheio e esvaziou')
+                    last_time_busy = clock.get_time()
+                    server_state = 0
             tm.sleep(0.5)
 
-
-        manager.handle_clock(fila1,servidor)  # avança unidade de tempo
-        if timestep >= time_horizon:
-            # print('Fim da simulação')
-            # print(manager.get_records())
-            # Statistcs.plot_time_series(manager.get_records()['N2'],'Número de pessoas na fila 1','Tempo','Número de pessoas')
-            manager.set_busy_time(clock.get_time())
+        if servidor.is_busy():
+                if server_state != 1:
+                    empty_time += clock.get_time() - last_time_busy
+                    server_state = 1
+        else:
+                if server_state != 0:
+                    last_time_busy = clock.get_time()
+                    server_state = 0
+        if n_fregueses > max_costumers and not servidor.is_busy():
+            manager.set_busy_time(clock.get_time()) #Calcula o tempo ocupado
             return manager.get_records()
+        manager.handle_clock(fila1,servidor)  # avança unidade de tempo
+
 
 if __name__ == '__main__':
     results = dict({
@@ -85,28 +107,73 @@ if __name__ == '__main__':
         'Nq2':[],
         'N1':[],
         'N2':[],
+        'N': [],
         'rho':[]
     })
-    means = list()
-    for simulation in range(1000):
-        records = sim(0.5, time_horizon=1000, debugging=False)
-        for key in records: #Appenda os resultados das simulações
-            results[key]+=records[key]
-        # print(records['rho'])
+    means = dict({
+        'T1': [],
+        'W1': [],
+        'N1': [],
+        'Nq1': [],
+        'T2': [],
+        'W2': [],
+        'N2': [],
+        'Nq2': [],
+        'N': [],
+        # 'rho':[]
+    })
+    vars = dict({
+        'W1':[],
+        'W2':[],
+        # 'rho':[]
+    })
+
+    n_rodadas = int(input('Insira o número de rodadas:'))
+    n_fregueses = int(input('Número de fregueses por rodada:'))
+    rho = float(input('Taxa de ocupação do servidor:'))
+    time = tm.time()
+    for simulation in range(n_rodadas):
         
-        # NOTAS PARA O THIAGOOo
-        #PRINTA A PORCENTAGeM DO TEMPO QUE FICA OCUPADO, REPARA QUE QUANDO AUMENTA O TIME_HORIZON O RHO FICA AUMENTANDO MTO, OU SEJA TEM T->inf A FILA ESTOURA, DESCOBRE PQ
-        #AGORA O BGL ELE NAO AVANÇA UNIDADEP OR UNIDADE, ELE CALCULA O TEMPO DO PROXIMO EVENTO E PULA PRA ELE, COMO SE ELE TIVESSE UMA AGENDA DE EVENTOS FUTUROS E FOSSE 
-        #RESOLVENDO UM POR UM, ASSIM ELE CONSEGUE TRABALHAR COM NÙMEROS DECIMAIS SUPER PRECISOS. EX: SÓ EXISTEM 2 TIPOS DE EVENTO, CHEGA ALGUEM NA FILA E TERMINA ALGUEM Q TA EM 
-        # SERVIÇO, ENT POR EXEMPLO PROX CHEGADA: t, FIM DO SERVIÇO: t+1, PROX EVENTO = min(PROX CHEGADA,FIM DO SERVICO) ai o relogio avança direto para PROXIMO EVENTO e faz os 
-        #tramentos. SE MUDAR A OPÇÂO DE DEBUGGING P TRUE ELE FICA PRINTANDO AS COISAS, DEIXA EM FALSE P RODAR MAIS RÁPIDO
-        # POSSIVEIS IDEIAS, checa se a contagem de tempo ta sendo feito certa e se realmente ta estourando ou é só impressão e contagem errada(dificil), 
-        #ve como a função exponencial deveria funcionar, as vezes eu to passando parametros errados(médio), faz mágica
-        means.append(Statistcs.calc_mean(records['W2']))
-        
-    #ALGUMS POSSIVEIS PRINTS UTEIS PRO THIGS
-    # Statistcs.print_full_statistics(results,plots = False)
-    # interval = Statistcs.calc_conf_int(means)
-    # print(f'Intervalo de confiança para o Tempo total médio: \n\tlimite inferior:{interval[0]}\n\tlimite superior{interval[1]}')
-    Statistcs.plot_scatter(means,'Médias de tempo nas simulações','Simualção','Tempo médio total')
-    # Statistcs.plot_hist(means,'Médias de tempo nas simulações','Simualção','Tempo médio total')
+        records = sim(rho, max_costumers = n_fregueses, debugging=False)
+        for key in results: #Appenda os resultados das simulações
+            #Descarta a fase transiente
+            results[key]+=records[key][:]
+            if key == 'rho':
+                results[key]+=records[key]
+            if key in means:
+                means[key].append(Statistcs.calc_mean(records[key][:]))
+            if key in vars:
+                vars[key].append(Statistcs.calc_var(records[key][:])) 
+
+    # Analise corretude
+    # print(results['rho'])
+    # Statistcs.plot_line(results['rho'],'Taxa de ocupação', 'N° de fregueses/60','rho')
+    
+    
+    #Analise fase transiente]
+    # print(np.mean(means['W1']))
+    # print(np.mean(means['W2']))
+    # print(np.mean(means['N']))
+    # intervalos = [i*1 for i in range (500)]
+    # Statistcs.plot_line([np.mean(results['W1'][i:]) for i in intervalos],'Fases X W1', 'Número da coletas descartadas','W1')   
+    # Statistcs.plot_line([np.mean(results['W2'][i:]) for i in intervalos],'Fases X W2', 'Número da coletas descartadas','W2')   
+    # Statistcs.plot_line([np.mean(results['N'][i*3:]) for i in intervalos],'Fases X N', 'Número da coletas descartadas','N')   
+
+    # Analise número de fregueses
+    # Statistcs.plot_line(means['W1'],'N° de fregueses X W1', 'Número de fregueses/50','W1')   
+    # Statistcs.plot_line(means['W2'],'N° de fregueses X W2', 'Número de fregueses/50','W2')   
+    # Statistcs.plot_line(means['N'],'N° de fregueses X N', 'Número de fregueses/50','N')   
+
+    
+    ## Analise do intervalo de confiança
+    # precs = []
+    # for data in means:
+    #     upper, lower = Statistcs.calc_conf_int(means[data])
+    #     prec = Statistcs.calc_precision(upper,lower)
+    #     precs.append(prec)
+    # Statistcs.plot_line(precs, 'Tabela de precisão do intervalo', 'N° de rodadas', 'Precisão')
+    
+    #Print tabela
+    Statistcs.print_full_statistics(results,means,vars,plots = False)
+    
+    print('Tempo de execução:',tm.time()-time)

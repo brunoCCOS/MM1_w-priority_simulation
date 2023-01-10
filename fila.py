@@ -63,7 +63,14 @@ class Fila:
         '''
         return self.next_arrival
     
-    def set_next_arrival_time(self,time):
+    def set_next_arrival_time(self,t):
+        '''
+        Define a próxima chegada na fila para um t específico
+        '''
+        self.next_arrival = t
+        return self.next_arrival
+    
+    def generate_next_arrival_time(self,time):
         '''
         Programa a próxima chegada na fila
         '''

@@ -12,7 +12,8 @@ class Service:
     def __init__(self,service):
         self.service_time = service #tempo de serviço usado
         self.current = None #Cliente na file
-    
+        self.last_ended_job = 0 #TEmpo que o último serviço foi finalizado
+        self.empty_time = 0 #Tempo vazio do servidor
     def start_new_costumer(self,customer,time):
         '''
         Função para iniciar um novo cliente na fila
@@ -48,6 +49,7 @@ class Service:
         current_.leave_server(time)
         current_.leave_queue(time)
         self.current = None
+        self.last_ended_job = time
         return current_
         
     def get_current(self):
