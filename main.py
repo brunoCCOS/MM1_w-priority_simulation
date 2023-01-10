@@ -94,20 +94,14 @@ def sim(rho: int, service_rate=1, max_costumers: int = None, debugging=False):
 
 if __name__ == '__main__':
     results = dict({
-        'W1':[],
-        'W2':[],
-        'W':[],
-        'S1':[],
-        'S2':[],
-        'S':[],
-        'T1':[],
-        'T2':[],
-        'T':[],
-        'Nq1':[],
-        'Nq2':[],
-        'N1':[],
-        'N2':[],
-        'N': [],
+        'T1': [],
+        'W1': [],
+        'N1': [],
+        'Nq1': [],
+        'T2': [],
+        'W2': [],
+        'N2': [],
+        'Nq2': [],
         'rho':[]
     })
     means = dict({
@@ -119,7 +113,7 @@ if __name__ == '__main__':
         'W2': [],
         'N2': [],
         'Nq2': [],
-        'N': [],
+        # 'N': [],
         # 'rho':[]
     })
     vars = dict({

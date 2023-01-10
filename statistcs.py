@@ -61,8 +61,8 @@ class Statistcs():
             return (lower, 
                     upper)#Intervalo de confiança usando t-student
         elif dist == 'chi2':
-            return ((n - 1) * s2 / chi2.ppf(1-conf / 2, dof),
-                    (n - 1) * s2 / chi2.ppf(conf / 2, dof)) #Intervalo de confiança usando chi-square usando a ppf(innversa da cdf)
+            return ((n - 1) * m / chi2.ppf(1-conf / 2, dof),
+                    (n - 1) * m / chi2.ppf(conf / 2, dof)) #Intervalo de confiança usando chi-square usando a ppf(innversa da cdf)
 
     def calc_precision(upper,lower):
         '''
@@ -134,10 +134,10 @@ class Statistcs():
             print(f'\t\ desvio padrão: {Statistcs.calc_std(results[data])}')
             if data in means:
                 mean_conf = Statistcs.calc_conf_int(means[data])
-                print(f'\t\ intervalo de confiança para média: {mean_conf}, valor médio {(mean_conf[1]-mean_conf[0])/2}, precisão: {Statistcs.calc_precision(mean_conf[1],mean_conf[0])}')
+                print(f'\t\ intervalo de confiança para média: {mean_conf}, valor médio {(mean_conf[1]+mean_conf[0])/2}, precisão: {Statistcs.calc_precision(mean_conf[1],mean_conf[0])}')
             if data in vars:
-                var_conf = Statistcs.calc_conf_int(vars[data], dist = "chi2")
-                print(f'\t\ intervalo de confiança para variancia: {var_conf} valor médio {(var_conf[1]-var_conf[0])/2}, precisão:{Statistcs.calc_precision(var_conf[1],var_conf[0])}')
+                var_conf = Statistcs.calc_conf_int(vars[data])
+                print(f'\t\ intervalo de confiança para variancia: {var_conf} valor médio {(var_conf[1]+var_conf[0])/2}, precisão:{Statistcs.calc_precision(var_conf[1],var_conf[0])}')
             print('-'*30)
             if plots:
                 Statistcs.plot_scatter(results[data],f'Progresso no tempo de {data}','Tempo',f'{data}')
