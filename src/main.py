@@ -177,6 +177,6 @@ if __name__ == '__main__':
     
     #Print tabela
     Statistcs.print_full_statistics(results,means,vars,plots = False)
-    input('\digite algo para sair...')
+    input('enter para sair...')
     # print('Tempo de execução:',tm.time()-time)
     
