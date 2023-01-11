@@ -487,3 +487,37 @@ self.clock = clock
 ### Main.py
 
 Função principal que orquestra e organiza a simulação e componentes
+
+Var. globais:
+
+```
+  	clock  #  relógio da simulação
+    next_arrival  #Próxima chegada
+    finish_time  #Tempo de término do serviço
+
+    fila1 #Cria fila 1
+    fila2 #Cria fila 2
+    customer#cliente inicial
+    servidor#Cria servidor
+    
+    #Variaveis para debbug
+    arrive  #Chegou nesse instante
+    server_state #Estado do servidor cheio ou vazio
+    empty_time  #Tempo vazio
+    last_time_busy  #Ultimo instante ocupado
+    
+    n_fregueses  #N de fregueses até o momento
+    on  #Variavel de iteração do loop
+    
+    manager #INstancia de gerente 
+```
+
+Funções
+
+```
+def sim(rho: int, service_rate=1, max_costumers: int = None, debugging=False):
+'''
+Função que realiza a simulação de 1 rodada
+'''
+```
+
