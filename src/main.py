@@ -127,6 +127,7 @@ if __name__ == '__main__':
     n_rodadas = int(input('Insira o número de rodadas:'))
     n_fregueses = int(input('Número de fregueses por rodada:'))
     rho = float(input('Taxa de ocupação do servidor:'))
+    print('rodando...')
     time = tm.time()
     for simulation in range(n_rodadas):
         
@@ -176,6 +177,6 @@ if __name__ == '__main__':
     
     #Print tabela
     Statistcs.print_full_statistics(results,means,vars,plots = False)
-    
+    input('\digite algo para sair...')
     # print('Tempo de execução:',tm.time()-time)
     
