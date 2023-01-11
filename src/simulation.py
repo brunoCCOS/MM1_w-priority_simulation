@@ -61,7 +61,7 @@ class Manager():
             'N2':[],
             'N': [],
             'rho':[]
-        })
+        }) #Dicionario de registros das estatisticas coletadas
         self.next_event = 0
     def handle_queue(self,fila,service):
         '''
@@ -137,6 +137,9 @@ class Manager():
         '''
         return self.records
     def set_busy_time(self,time):
+        '''
+        Calcula o tempo de ocupação da fila e o número de pessoas total no servidor pra cada fila
+        '''
         self.records['rho'].append(sum(self.records['S'])/time)
          #Appenda os valores da fila de espera
         self.records['N1'] += self.records['Nq1']

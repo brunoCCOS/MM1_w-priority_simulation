@@ -8,12 +8,15 @@ import numpy as np
 from scipy.stats import t,chi2
 
 def sim(rho: int, service_rate=1, max_costumers: int = None, debugging=False):
+    '''
+    Função que realiza a simulação de 1 rodada
+    '''
     # inicializa variaveis de fila e tempo
     clock = Clock()  # Inicia o relógio
     Fila.reset() #Reinicia globais das classes
     Client.reset()#Reinicia globais das classes
-    next_arrival = 0
-    finish_time = None
+    next_arrival = 0 #Próxima chegada
+    finish_time = None #Tempo de término do serviço
 
     fila1 = Fila(rho, 1)#Cria fila 1
     fila2 = Fila(rho, 2)#Cria fila 2
@@ -21,15 +24,15 @@ def sim(rho: int, service_rate=1, max_costumers: int = None, debugging=False):
     servidor = Service(service_rate)#Cria servidor
     
     #Variaveis para debbug
-    arrive = False
-    server_state = 0
-    empty_time = 0
-    last_time_busy = 0
+    arrive = False #Chegou nesse instante
+    server_state = 0 #Estado do servidor cheio ou vazio
+    empty_time = 0 #Tempo vazio
+    last_time_busy = 0 #Ultimo instante ocupado
     
-    n_fregueses = 0 
-    on = True
-
-    manager = Manager(clock)
+    n_fregueses = 0  #N de fregueses até o momento
+    on = True #Variavel de iteração do loop
+    
+    manager = Manager(clock) #INstancia de gerente 
     while on:
         timestep = clock.get_time()
         # Programa a próxima chegada em caso de não existir
@@ -146,9 +149,6 @@ if __name__ == '__main__':
                 if key in vars:
                     vars[key].append(Statistcs.calc_var(records[key][:])) 
 
-    # print(results['Nq1'])
-    # print(results['N1'],results['Nq1'])
-    # print(results['N2'],results['Nq2'])
     # Analise corretude20
     # print(results['rho'])
     # Statistcs.plot_line(results['rho'],'Taxa de ocupação', 'N° de fregueses/60','rho')
