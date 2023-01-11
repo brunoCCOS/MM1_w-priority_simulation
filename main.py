@@ -148,7 +148,7 @@ if __name__ == '__main__':
     # print(results['Nq1'])
     # print(results['N1'],results['Nq1'])
     # print(results['N2'],results['Nq2'])
-    # Analise corretude
+    # Analise corretude20
     # print(results['rho'])
     # Statistcs.plot_line(results['rho'],'Taxa de ocupação', 'N° de fregueses/60','rho')
     
