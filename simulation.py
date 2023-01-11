@@ -8,7 +8,7 @@ class Clock():
     '''
     def __init__(self):
         self.time = 0.0
-
+        self.last_saved_time = 0.0
     def tick_clock(self):
         '''
         Avança uma unidade de tempo no contador
@@ -21,6 +21,18 @@ class Clock():
         '''
         return self.time
 
+    def get_saved_time(self):
+        '''
+        Retorna o tempo salvo
+        '''
+        return self.last_saved_time
+    
+    def save_time(self):
+        '''
+        Salva o tempo atual
+        '''
+        self.last_saved_time = self.time
+    
     def set_time(self,time):
         '''
         Define um tempo especifico pro relógio
@@ -55,15 +67,15 @@ class Manager():
         '''
         Serviço de verificação e tratamento das pendencias das filas de espera
         '''
+        last_saved = self.clock.get_saved_time() #Recupera último tempo salvo
         customer = fila.get_next()
+        interval = self.clock.get_time() - last_saved
         if customer is not None:
             #Verifica como tratar o próximo da fila
             service.arrive_costumer(customer,self.clock.get_time())
-        self.records[f'Nq{fila.id}'].append(fila.get_number_customers())
-        if service.is_busy() and service.get_current().get_queue_id() == fila.get_id(): # Se o fregues no servidor for da fila o número total no instante será as pessoas na fila de espera mais 1
-            self.records[f'N{fila.id}'].append(fila.get_number_customers()+1)
-        else:# se não entrar o número total será apenas as pessoas na fila
-            self.records[f'N{fila.id}'].append(fila.get_number_customers())
+        # print(fila.get_weighted_number_costumers())
+        self.records[f'Nq{fila.id}'] = fila.get_weighted_number_costumers() #Registra os números de fregueses ponderados pelo tempo até o momento
+
 
     def handle_server(self,service):
         '''
@@ -98,11 +110,14 @@ class Manager():
             self.records['W'].append(self.records['W1'][costumer.get_id()] + self.records['W2'][costumer.get_id()])
             self.records['S'].append(self.records['S2'][costumer.get_id()] + self.records['S1'][costumer.get_id()])
             self.records['T'].append(self.records['W'][costumer.get_id()] + self.records['S'][costumer.get_id()])
-    
+        self.records[f'N{costumer.get_queue_id()}'].append(costumer.get_served_time()) #Como nossa quantidade de fregueses é ponderada pelo tempo cada fregues que termina seu
+        #serviço tem seu tempo em serviço adicionado a lista 1*served_time
     def handle_clock(self,fila,servidor):
         '''
         Serviço de tratamento do tempo de simulação, verifica qual o próximo evento(fim de serviço ou chegada de fregues) e avança até ele
         '''
+        self.clock.save_time() # salva o tempo para o próxima iteração
+        #Verifica qual o próximo evento
         prox_chegada = fila.get_next_arrival_time()
         if servidor.is_busy():
             fim_servico = servidor.get_current().get_estimated_finish()
@@ -112,9 +127,10 @@ class Manager():
                 time = prox_chegada
         else:
             time = prox_chegada
-        if time == np.inf:
+        if time == np.inf: #Se estiver configurado para parar
             time = self.clock.get_time()
-        self.clock.set_time(time)
+        self.clock.set_time(time) #Avança o tempo
+
     def get_records(self):
         '''
         Retorna histórico de coleta dos fregueses
@@ -122,7 +138,10 @@ class Manager():
         return self.records
     def set_busy_time(self,time):
         self.records['rho'].append(sum(self.records['S'])/time)
-        self.records['N'] = list(np.array(self.records['N1']) + np.array(self.records['N2']))
+         #Appenda os valores da fila de espera
+        self.records['N1'] += self.records['Nq1']
+        self.records['N2'] += self.records['Nq2']
+        self.records['total_time'] = [self.clock.get_time()]
     def get_n_customers(self):
         '''
         Retorna o número de fregueses que já passaram pelo sistema

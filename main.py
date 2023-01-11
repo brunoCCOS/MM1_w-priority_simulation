@@ -5,6 +5,7 @@ from cliente import Client
 from servidor import Service
 import time as tm
 import numpy as np
+from scipy.stats import t,chi2
 
 def sim(rho: int, service_rate=1, max_costumers: int = None, debugging=False):
     # inicializa variaveis de fila e tempo
@@ -102,7 +103,8 @@ if __name__ == '__main__':
         'W2': [],
         'N2': [],
         'Nq2': [],
-        'rho':[]
+        'rho':[],
+        'total_time': []
     })
     means = dict({
         'T1': [],
@@ -131,23 +133,28 @@ if __name__ == '__main__':
         records = sim(rho, max_costumers = n_fregueses, debugging=False)
         for key in results: #Appenda os resultados das simulações
             #Descarta a fase transiente
-            results[key]+=records[key][:]
             if key == 'rho':
                 results[key]+=records[key]
-            if key in means:
-                means[key].append(Statistcs.calc_mean(records[key][:]))
-            if key in vars:
-                vars[key].append(Statistcs.calc_var(records[key][:])) 
+            elif key[:1] == 'N': #tratamento especial para número de pessoas pois dividi-se pelo tempo total da simulação
+                results[key].append(sum(records[key])/sum(records['total_time'])) #Calcula a média para o número de pessoas
+                means[key].append(sum(records[key])/sum(records['total_time'])) 
+            else: 
+                results[key]+=records[key][:]
+                if key in means:
+                    means[key].append(Statistcs.calc_mean(records[key][:]))
+                if key in vars:
+                    vars[key].append(Statistcs.calc_var(records[key][:])) 
 
+    # print(results['Nq1'])
+    # print(results['N1'],results['Nq1'])
+    # print(results['N2'],results['Nq2'])
     # Analise corretude
     # print(results['rho'])
     # Statistcs.plot_line(results['rho'],'Taxa de ocupação', 'N° de fregueses/60','rho')
     
-    
     #Analise fase transiente]
     # print(np.mean(means['W1']))
     # print(np.mean(means['W2']))
-    # print(np.mean(means['N']))
     # intervalos = [i*1 for i in range (500)]
     # Statistcs.plot_line([np.mean(results['W1'][i:]) for i in intervalos],'Fases X W1', 'Número da coletas descartadas','W1')   
     # Statistcs.plot_line([np.mean(results['W2'][i:]) for i in intervalos],'Fases X W2', 'Número da coletas descartadas','W2')   
@@ -170,4 +177,5 @@ if __name__ == '__main__':
     #Print tabela
     Statistcs.print_full_statistics(results,means,vars,plots = False)
     
-    print('Tempo de execução:',tm.time()-time)
+    # print('Tempo de execução:',tm.time()-time)
+    

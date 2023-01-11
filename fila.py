@@ -13,16 +13,21 @@ class Fila:
         self.priority_order = priority #prioridade da fila
         self.arrival_time = busy/2 #tempo de chegada
         self.queue = []
-        self.number_customers = 0
+        self.weighted_number_costumers = [] #lista do número pessoas ponderada pelo tempo, serve pois como não iteramos os instantes temos que pesar cada coleta pelo tempo que ficou no estado
+        self.number_customers = 0. #número de pessoas na fila
         self.next_arrival = None
+        self.last_chg_time = 0 #Momento da última chegada ou partida da fila
         Fila.filas.append(self)
     def arrive_customer(self,time):
         '''
         Anuncia chegada de novo freguês na fila
         '''
         customer = Client(self,time)
+        interval = time - self.last_chg_time
+        self.weighted_number_costumers.append(self.number_customers*interval)
         self.number_customers += 1
         self.queue.append(customer)
+        self.last_chg_time = time 
         return customer
     def insert_costumer(self,time,id):
         '''
@@ -30,7 +35,10 @@ class Fila:
         cliente novo é inserido um freguês arbitrário
         '''
         customer = Client(self,time,id)
+        interval = time - self.last_chg_time
+        self.weighted_number_costumers.append(self.number_customers*interval)
         self.number_customers += 1
+        self.last_chg_time = time 
         self.queue.append(customer)
         return customer
     def kick_out(self,customer,time):
@@ -39,13 +47,20 @@ class Fila:
         '''
         self.queue.insert(0,customer)
         customer.leave_server(time)
+        interval = time - self.last_chg_time
+        self.weighted_number_costumers.append(self.number_customers*interval)
         self.number_customers += 1
-    def consume_costumer(self):
+        self.last_chg_time = time 
+
+    def consume_costumer(self,time):
         '''
         Consome um fregues da fila de espera
         '''
         customer = self.queue[0]
+        interval = time - self.last_chg_time
+        self.weighted_number_costumers.append(self.number_customers*interval)
         self.number_customers -= 1
+        self.last_chg_time = time
         self.queue.pop(0)
         return customer
     def get_next(self):
@@ -78,11 +93,30 @@ class Fila:
         self.next_arrival = time + arrival
         return self.next_arrival
     
+    def get_last_arrival_time(self):
+        '''
+        Retorna o tempo da última chegada à fila
+        '''
+        return self.last_arrival_time
+    
+    def get_last_depart_time(self):
+        '''
+        Retorna o tempo da última partida à fila
+        '''
+        return self.last_depart_time
+    
     def get_number_customers(self):
         '''
         Retorna o número de pessoas na fila
         '''
         return self.number_customers
+    
+    def get_weighted_number_costumers(self):
+        '''
+        Retorna o número de pessoas na fila ponderado
+        '''
+        return self.weighted_number_costumers
+
     def get_id(self):
         '''
         Retorna o id da fila

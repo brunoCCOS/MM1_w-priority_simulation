@@ -1,4 +1,5 @@
 import numpy as np
+
 class Client():
     '''
     Classe para manipulação do freguês
@@ -84,7 +85,12 @@ class Client():
         Retorna o id do freguês
         '''
         return self.id
-    
+
+    def get_last_start_served_time(self):
+        '''
+        Retorna o último instante que entrou no servidor
+        '''
+        return self.last_start_served_time
     def reset():
         '''
         Retorna o estado inicial da classe

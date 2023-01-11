@@ -28,14 +28,14 @@ class Service:
         '''
         if not self.is_busy(): #Caso a fila esteja vazia
             queue_in = Fila.filas[customer.get_queue_id()-1]
-            queue_in.consume_costumer()
+            queue_in.consume_costumer(time)
             self.start_new_costumer(customer,time)
             return (0,customer)
         elif self.current.get_priority() > customer.get_priority(): #Caso a prioridade do cliente novo seja maior que a do atual
             queue_out = Fila.filas[self.current.get_queue_id()-1]
             queue_in = Fila.filas[customer.get_queue_id()-1]
             queue_out.kick_out(self.current,time)
-            queue_in.consume_costumer()
+            queue_in.consume_costumer(time)
             self.start_new_costumer(customer,time)
             return (1,self.current)
         else: #Cliente permanece em espera e retorna flag de ocupado
