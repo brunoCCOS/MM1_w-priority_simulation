@@ -16,7 +16,9 @@
 
 ​	 Para analise dos números usamos como base $\rho=0.9$ pois entediamos que era o que continha maior variancia e portanto qualquer configuração que funcionasse pra ele funcionaria para os outros. Analisando o número de fregueses por rodada notamos convergência das médias de pessoas no sevidor e de $\rho$  após cerca de 3000 fregueses, aumentar o número de fregueses além disso não causou nenhuma variação maior que 1 desvio padrão das médias, logo foram estatisticamente insignificantes, assim sendo escolhemos como margem o número máximo de 3000 fregueses. Para controle do intervalo de confiança observamos que 200 rodadas com 3 mil coletas em cada mantem a precisão controlada, que descontando os 430 da fase transiente concluem 2570 fregueses por rodada. Todos os testes foram feitos para diferentes valores de $\rho$ mas para ilustração a baixo usamos sempre o caso de $\rho = 0.9$ uma vez que os valores se encaixaram bem para todos os cenários e o procedimento foi o mesmo.
 
-​				
+​	Os intervalos de confiança foram gerados usando amostras das Médias e Variâncias de cada rodada e construindo um intervalo a partir da t-student usando a inversa da cdf para encontrar o ponto crítico.
+
+​	O cálculo do número de pessoas nas filas foi realizado de forma alternativa. Como não iteramos sobre os instantes de tempo, para dimensionar a quantidade de pessoas que temos de forma correta, para cada vez que havia uma chegada ou partida na fila fazíamos o produto entre o número de fregueses até aquele momento pelo tempo que permaneceu naquele estado (N fregueses * intervalo com N fregueses) gerando assim uma lista do número de pessoas ponderado pelo tempo em que aquela quantidade permaneceu na fila. Ex: se no instante 2 a fila tinha 10 fregueses e no instante 4 acontece uma partida/chegada, então o calculávamos (4-2)*10. Por fim como no final tínhamos na verdade lista de tempos escaladas pelo número de fregueses, para partir de Nq para N, apenas somávamos o tempo em serviço que os fregueses de uma determinada fila ficaram em serviço durante todo o processo, pois matematicamente para calculo da média é equivalente fazermos o calculo dos tempos com 1 freguês ou somarmos essa quantidade posteriormente.
 
 ​	Para a implementação da geração de números aleatórios foi usado as funções nativas da biblioteca numpy que oferece um gerador de números pseudo-aleatórios e a seleção da semente inicial é deixada por padrão, onde a biblioteca usa o tempo atual do sistema operacional para seleciona-la. Como o método utilizado para coleta de estatísticas foi o replicativo, mantemos as estruturas geradoras de números vivas até o fim da execução continuando a simulação de onde ela parou na rodada anterior.
 
@@ -66,8 +68,6 @@ Valores para diferentes fases transientes simulando 500 fregueses
 
 ![W2-transiente](C:\Users\Bruno Trotti\Documents\FACULDADE\AVALIAÇÃO E DESEMPENHO 2022.2\TRAB FINAL\img\W2-transiente.png)
 
-![N-transiente](C:\Users\Bruno Trotti\Documents\FACULDADE\AVALIAÇÃO E DESEMPENHO 2022.2\TRAB FINAL\img\N-transiente.png)
-
 
 
  Analisando os resultados aumentando gradativamente a fase transiente, vimos que na maioria das simulações a média fica mais próxima da original a partir da faixa dos 430 fregueses(para o caso do número de pessoas na fila, a partir do instante que o 430° freguês chegar). Logo escolhemos esse threshold como determinante da nossa fase transiente
@@ -98,92 +98,74 @@ Assim realizamos as simulações para diferentes valores de $\rho$ utilizando 30
 
 Para $\rho = 0.2$
 
+```
+Soluções Analíticas 
+
+W1: 0.11111111111111112
+T1: 1.1111111111111112
+W2 0.5277777777777777
+T2 1.5277777777777777
+Nq1: 0.011
+N1: 0.111
+Nq2: 0.05277777777777777
+N2: 0.1527777777777778
+```
+
 ````
-ACULDADE/AVALIAÇÃO E DESEMPENHO 2022.2/TRAB FINAL/main.py"
-Estatisticas a respeito de W1:
-        \ esperança: 0.11214790343904636
-        \ variancia: 0.23762170831278456
-        \ desvio padrão: 0.48746457134112275
-        \ intervalo de confiança para média: (0.11052598071853657, 0.11376965168320809), valor médio 0.0016218354823357567, precisão: 0.01446158772660204
-        \ intervalo de confiança para variancia: (0.0019367955400278677, 0.0019613347459450136) valor médio 1.226960295857291e-05, precisão:0.00629512205003723
-------------------------------
-Estatisticas a respeito de W2:
-        \ esperança: 0.527148614522155
-        \ variancia: 1.484433822821138
-        \ desvio padrão: 1.2183734332384049
-        \ intervalo de confiança para média: (0.5212494142026638, 0.533047300732185), valor médio 0.005898943264760592, precisão: 0.011190290515369997
-        \ intervalo de confiança para variancia: (0.08160086907197489, 0.08263475235381393) valor médio 0.0005169416409195188, precisão:0.0062951220500371535
-------------------------------
-Estatisticas a respeito de W:
-        \ esperança: 0.6392965179612011
-        \ variancia: 2.0817004676956694
-        \ desvio padrão: 1.4428099208473961
-------------------------------
-Estatisticas a respeito de S1:
-        \ esperança: 0.9993751208038042
-        \ variancia: 0.996518154276011
-        \ desvio padrão: 0.9982575590878393
-------------------------------
-Estatisticas a respeito de S2:
-        \ esperança: 0.9976267644262515
-        \ variancia: 0.9960016420685063
-        \ desvio padrão: 0.9979988186708971
-------------------------------
-Estatisticas a respeito de S:
-        \ esperança: 1.9970018852300562
-        \ variancia: 1.990805695408507
-        \ desvio padrão: 1.4109591402335175
-------------------------------
 Estatisticas a respeito de T1:
-        \ esperança: 1.1115230242428507
-        \ variancia: 1.235319111387193
-        \ desvio padrão: 1.1114491042720729
-        \ intervalo de confiança para média: (1.1079546724287166, 1.115091226821363), valor médio 0.003568277196323244, precisão: 0.0032102595790100092
+        \ esperança: 1.112304781275521
+        \ variancia: 1.2317265756019842
+        \ desvio padrão: 1.1098317780645786
+        \ intervalo de confiança para média: (1.1090012469426778, 1.11560844669289), valor médio 1.1123048468177839, precisão: 0.002970048979429899
 ------------------------------
-Estatisticas a respeito de T2:
-        \ esperança: 1.5247753789484062
-        \ variancia: 2.7005085578099663
-        \ desvio padrão: 1.6433224144427552
-        \ intervalo de confiança para média: (1.5176056946930405, 1.5319448926759893), valor médio 0.007169598991474402, precisão: 0.004702069230246745
-------------------------------
-Estatisticas a respeito de T:
-        \ esperança: 2.6362984031912577
-        \ variancia: 4.516075602694339
-        \ desvio padrão: 2.1251060215185356
-------------------------------
-Estatisticas a respeito de Nq1:
-        \ esperança: 0.040996061974752536
-        \ variancia: 0.048517915806650276
-        \ desvio padrão: 0.22026782744343368
-        \ intervalo de confiança para média: (0.040542736701368494, 0.04144935438907362), valor médio 0.0004533088438525637, precisão: 0.011057379750262431
-------------------------------
-Estatisticas a respeito de Nq2:
-        \ esperança: 0.19443788204123988
-        \ variancia: 0.2856982216720536
-        \ desvio padrão: 0.5345074570780595
-        \ intervalo de confiança para média: (0.1925631533401479, 0.19631242748111388), valor médio 0.0018746370704829929, precisão: 0.009641320581374478
+Estatisticas a respeito de W1:
+        \ esperança: 0.11171551158671816
+        \ variancia: 0.2346208841874424
+        \ desvio padrão: 0.4843767998030484
+        \ intervalo de confiança para média: (0.11011397710902261, 0.11331686048309846), valor médio 0.11171541879606053, precisão: 0.014335010370962275
+        \ intervalo de confiança para variancia: (0.22833624699893945, 0.2406404471282056) valor médio 0.23448834706357252, precisão:0.026236272043681404 
 ------------------------------
 Estatisticas a respeito de N1:
-        \ esperança: 0.40776031886863
-        \ variancia: 0.3326864961036238
-        \ desvio padrão: 0.5767898196948553
-        \ intervalo de confiança para média: (0.40706101285458496, 0.4084596098058926), valor médio 0.000699298475653809, precisão: 0.001714974351899241
+        \ esperança: 0.11119244831896304
+        \ variancia: 1.0148561895270875e-05
+        \ desvio padrão: 0.003185680758530408
+        \ intervalo de confiança para média: (0.11074824214057426, 0.11163665449735181), valor médio 0.11119244831896304, precisão: 0.00399493117657184   
+------------------------------
+Estatisticas a respeito de Nq1:
+        \ esperança: 0.011173032234439741
+        \ variancia: 1.4903605351445507e-06
+        \ desvio padrão: 0.0012208032335903074
+        \ intervalo de confiança para média: (0.011002805403799, 0.011343259065080482), valor médio 0.011173032234439741, precisão: 0.015235508774067078  
+------------------------------
+Estatisticas a respeito de T2:
+        \ esperança: 1.5260894000453549
+        \ variancia: 2.713041883935662
+        \ desvio padrão: 1.6471314106456905
+        \ intervalo de confiança para média: (1.5189624802180377, 1.5332140164103227), valor médio 1.5260882483141802, precisão: 0.004669302777224134
+------------------------------
+Estatisticas a respeito de W2:
+        \ esperança: 0.5270924752893164
+        \ variancia: 1.4946733640020187
+        \ desvio padrão: 1.222568347374501
+        \ intervalo de confiança para média: (0.5210702015540681, 0.5331133364104198), valor médio 0.527091768982244, precisão: 0.011424134813948652
+        \ intervalo de confiança para variancia: (1.4505818535438328, 1.5350209500114256) valor médio 1.4928014017776292, precisão:0.028282093105969283   
 ------------------------------
 Estatisticas a respeito de N2:
-        \ esperança: 0.5612295551973941
-        \ variancia: 0.5696613379336493
-        \ desvio padrão: 0.7547591257703674
-        \ intervalo de confiança para média: (0.5591544158529941, 0.5633044464766398), valor médio 0.0020750153118228587, precisão: 0.0036972674571185958
+        \ esperança: 0.15257025237484856
+        \ variancia: 3.877188076306215e-05
+        \ desvio padrão: 0.006226707056146303
+        \ intervalo de confiança para média: (0.15170201040240647, 0.15343849434729065), valor médio 0.15257025237484856, precisão: 0.005690768409485976  
 ------------------------------
-Estatisticas a respeito de N:
-        \ esperança: 0.9689898740660242
-        \ variancia: 0.6714595372107067
-        \ desvio padrão: 0.8194263464221215
+Estatisticas a respeito de Nq2:
+        \ esperança: 0.05270842541266129
+        \ variancia: 2.1469183655479775e-05
+        \ desvio padrão: 0.0046334850442706485
+        \ intervalo de confiança para média: (0.05206233974364826, 0.05335451108167432), valor médio 0.05270842541266129, precisão: 0.012257730409412523  
 ------------------------------
 Estatisticas a respeito de rho:
-        \ esperança: 0.20030717905567058
-        \ variancia: 1.8990279644591672e-05
-        \ desvio padrão: 0.004357783799661437
+        \ esperança: 0.19988124304671054
+        \ variancia: 1.731890029794212e-05
+        \ desvio padrão: 0.004161598286469048
 ------------------------------
 ````
 
@@ -191,91 +173,76 @@ Estatisticas a respeito de rho:
 
 Para $\rho = 0.4$
 
+```
+Soluçoes analíticas
+
+W1: 0.25
+T1: 1.25
+W2 1.5
+T2 2.5
+N1: 0.25
+Nq1: 0.05
+Nq2: 0.30000000000000004
+N2: 0.5
+```
+
+
+
 ````
-Estatisticas a respeito de W1:
-        \ esperança: 0.25054283215457396
-        \ variancia: 0.5587423718727579
-        \ desvio padrão: 0.7474907169141018
-        \ intervalo de confiança para média: (0.2473553820530371, 0.2537294005953217), valor médio 0.0031870092711422937, precisão: 0.012720439260989529
-        \ intervalo de confiança para variancia: (0.00829833683883108, 0.008403476794107401) valor médio 5.2569977638161104e-05, precisão:0.006295122050037155
-------------------------------
-Estatisticas a respeito de W2:
-        \ esperança: 1.5151607451172087
-        \ variancia: 6.534323263253011
-        \ desvio padrão: 2.556232239694393
-        \ intervalo de confiança para média: (1.4974280113221077, 1.532889755687951), valor médio 0.017730872182921686, precisão: 0.011702318731026225
-        \ intervalo de confiança para variancia: (2.243252446204253, 2.2716744621392726) valor médio 0.014211007967509737, precisão:0.006295122050037169  
-------------------------------
-Estatisticas a respeito de W:
-        \ esperança: 1.7657035772717833
-        \ variancia: 8.386391644886498
-        \ desvio padrão: 2.8959267333422813
-------------------------------
-Estatisticas a respeito de S1:
-        \ esperança: 0.9999759746455195
-        \ variancia: 0.9963879276596236
-        \ desvio padrão: 0.9981923299943872
-------------------------------
-Estatisticas a respeito de S2:
-        \ esperança: 0.998694302059508
-        \ variancia: 0.995122111792897
-        \ desvio padrão: 0.9975580743961211
-------------------------------
-Estatisticas a respeito de S:
-        \ esperança: 1.9986702767050273
-        \ variancia: 1.993522858908615
-        \ desvio padrão: 1.4119216900765477
-------------------------------
 Estatisticas a respeito de T1:
-        \ esperança: 1.2505188068000936
-        \ variancia: 1.5571716361556487
-        \ desvio padrão: 1.2478668343039048
-        \ intervalo de confiança para média: (1.245437210425607, 1.255598537937646), valor médio 0.0050806637560194545, precisão: 0.004062847769644541
+        \ esperança: 1.254441019264655
+        \ variancia: 1.5673514095731955
+        \ desvio padrão: 1.2519390598480404
+        \ intervalo de confiança para média: (1.2494322788436354, 1.2594506557261922), valor médio 1.2544414672849138, precisão: 0.003993162353059151
 ------------------------------
-Estatisticas a respeito de T2:
-        \ esperança: 2.513855047176717
-        \ variancia: 8.037166231134295
-        \ desvio padrão: 2.83498963510174
-        \ intervalo de confiança para média: (2.494963939091635, 2.532741661706681), valor médio 0.018888861307523097, precisão: 0.007513909050093887
-------------------------------
-Estatisticas a respeito de T:
-        \ esperança: 3.764373853976809
-        \ variancia: 11.411248080801998
-        \ desvio padrão: 3.3780538895645225
-------------------------------
-Estatisticas a respeito de Nq1:
-        \ esperança: 0.10033906174446772
-        \ variancia: 0.1406865186083874
-        \ desvio padrão: 0.3750820158423853
-        \ intervalo de confiança para média: (0.09929449317319454, 0.10138355816580817), valor médio 0.0010445324963068159, precisão: 0.01041003228143073
-------------------------------
-Estatisticas a respeito de Nq2:
-        \ esperança: 0.6033269230657061
-        \ variancia: 1.366854042403551
-        \ desvio padrão: 1.1691253322050426
-        \ intervalo de confiança para média: (0.597114025465766, 0.6095391193561591), valor médio 0.006212546945196573, precisão: 0.010297154525070094
+Estatisticas a respeito de W1:
+        \ esperança: 0.25138629849897476
+        \ variancia: 0.5669486483262148
+        \ desvio padrão: 0.7529599247810037
+        \ intervalo de confiança para média: (0.2483630015940181, 0.25440989429437266), valor médio 0.2513864479441954, precisão: 0.012027085687803035
+        \ intervalo de confiança para variancia: (0.550524452624005, 0.5824351260851399) valor médio 0.5664797893545724, precisão:0.028165765187750904    
 ------------------------------
 Estatisticas a respeito de N1:
-        \ esperança: 0.5003928403318407
-        \ variancia: 0.5010933533410894
-        \ desvio padrão: 0.7078794765644003
-        \ intervalo de confiança para média: (0.49896811859149887, 0.5018175012819838), valor médio 0.0014246913452424514, precisão: 0.002847145916070533
+        \ esperança: 0.2506908571117251
+        \ variancia: 8.319395621744987e-05
+        \ desvio padrão: 0.009121072098029369
+        \ intervalo de confiança para média: (0.24941902955379264, 0.2519626846696576), valor médio 0.2506908571117251, precisão: 0.005073290556287289    
+------------------------------
+Estatisticas a respeito de Nq1:
+        \ esperança: 0.05025076329690185
+        \ variancia: 2.1464726145802216e-05
+        \ desvio padrão: 0.004633004008826478
+        \ intervalo de confiança para média: (0.04960474470269402, 0.050896781891109674), valor médio 0.05025076329690185, precisão: 0.012855896146112003 
+------------------------------
+Estatisticas a respeito de T2:
+        \ esperança: 2.5067679949739805
+        \ variancia: 7.878502962041384
+        \ desvio padrão: 2.806867108012309
+        \ intervalo de confiança para média: (2.489905881016413, 2.523627730586571), valor médio 2.506766805801492, precisão: 0.006726164055650199
+------------------------------
+Estatisticas a respeito de W2:
+        \ esperança: 1.5070085994691464
+        \ variancia: 6.383661906787819
+        \ desvio padrão: 2.5265909654686527
+        \ intervalo de confiança para média: (1.4907972588639942, 1.5232181957084376), valor médio 1.507007727286216, precisão: 0.010756725482365751
+        \ intervalo de confiança para variancia: (6.185041508324702, 6.555250132854204) valor médio 6.370145820589453, precisão:0.02905809654568041       
 ------------------------------
 Estatisticas a respeito de N2:
-        \ esperança: 1.0033894508809598
-        \ variancia: 1.7274693114421422
-        \ desvio padrão: 1.3143322682800351
-        \ intervalo de confiança para média: (0.9969585573393587, 1.009819559324814), valor médio 0.0064305009927276835, precisão: 0.006408781259202664
+        \ esperança: 0.5010255390837931
+        \ variancia: 0.0007780092082516651
+        \ desvio padrão: 0.02789281642738261
+        \ intervalo de confiança para média: (0.49713620982299694, 0.5049148683445892), valor médio 0.5010255390837931, precisão: 0.007762736542149936    
 ------------------------------
-Estatisticas a respeito de N:
-        \ esperança: 1.5037822912128005
-        \ variancia: 2.0420118812955104
-        \ desvio padrão: 1.4289898114736543
+Estatisticas a respeito de Nq2:
+        \ esperança: 0.30125201844222815
+        \ variancia: 0.0006396452130866299
+        \ desvio padrão: 0.025291208217217104
+        \ intervalo de confiança para média: (0.2977254532272668, 0.3047785836571895), valor médio 0.30125201844222815, precisão: 0.011706362112350998    
 ------------------------------
 Estatisticas a respeito de rho:
-        \ esperança: 0.40006861194061405
-        \ variancia: 7.751072779090196e-05
-        \ desvio padrão: 0.008804017707325557
+        \ esperança: 0.40021361445638814
+        \ variancia: 7.782414705700427e-05
+        \ desvio padrão: 0.008821799536205993
 ------------------------------
 ````
 
@@ -283,91 +250,77 @@ Estatisticas a respeito de rho:
 
 Para $\rho = 0.6$
 
+
+
+````
+Soluções analíticas
+
+T1: 1.4285714285714286
+W1: 0.4285714285714286
+N1: 0.426
+Nq1: 0.126
+W2 3.6428571428571432
+T2 4.642857142857143
+Nq2: 1.092857142857143
+N2: 1.392857142857143
+````
+
+
+
 ```
-Estatisticas a respeito de W1:
-        \ esperança: 0.42849023787583934
-        \ variancia: 1.0259774972807547
-        \ desvio padrão: 1.0129054730233986
-        \ intervalo de confiança para média: (0.42348310964559593, 0.4334975566195349), valor médio 0.00500722348696947, precisão: 0.01168573267537484
-        \ intervalo de confiança para variancia: (0.028117949146030573, 0.028474203654987332) valor médio 0.0001781272544783795, precisão:0.006295122050037141
-------------------------------
-Estatisticas a respeito de W2:
-        \ esperança: 3.62519389659961
-        \ variancia: 25.0814458128212
-        \ desvio padrão: 5.00813795864503
-        \ intervalo de confiança para média: (3.564987988697899, 3.685407496027155), valor médio 0.060209753664627996, precisão: 0.01660868122062482
-        \ intervalo de confiança para variancia: (64.94428074860937, 65.76712500113594) valor médio 0.41142212626328245, precisão:0.006295122050037076    
-------------------------------
-Estatisticas a respeito de W:
-        \ esperança: 4.053684134475451
-        \ variancia: 29.433585755114837
-        \ desvio padrão: 5.4252728737930624
-------------------------------
-Estatisticas a respeito de S1:
-        \ esperança: 1.0008310772277327
-        \ variancia: 1.0000136900164198
-        \ desvio padrão: 1.000006844984783
-------------------------------
-Estatisticas a respeito de S2:
-        \ esperança: 1.0012707287771245
-        \ variancia: 1.007275518858425
-        \ desvio padrão: 1.0036311667432538
-------------------------------
-Estatisticas a respeito de S:
-        \ esperança: 2.0021018060048577
-        \ variancia: 2.009832754425394
-        \ desvio padrão: 1.4176857036823762
-------------------------------
 Estatisticas a respeito de T1:
-        \ esperança: 1.429321315103572
-        \ variancia: 2.022759236323057
-        \ desvio padrão: 1.4222374050498943
-        \ intervalo de confiança para média: (1.4223864630990235, 1.4362570358283486), valor médio 0.006935286364662563, precisão: 0.0048521519855587725
+        \ esperança: 1.4281108743141613
+        \ variancia: 2.0449516764995357
+        \ desvio padrão: 1.4300180685919797
+        \ intervalo de confiança para média: (1.4214418721848248, 1.4347806310597189), valor médio 1.4281112516222718, precisão: 0.004670069947191391
 ------------------------------
-Estatisticas a respeito de T2:
-        \ esperança: 4.626464625376734
-        \ variancia: 26.939001581821806
-        \ desvio padrão: 5.1902795282934235
-        \ intervalo de confiança para média: (4.565840706271486, 4.687097545205799), valor médio 0.06062841946715647, precisão: 0.013104684764858727
-------------------------------
-Estatisticas a respeito de T:
-        \ esperança: 6.055785940480307
-        \ variancia: 33.13233282836482
-        \ desvio padrão: 5.756069216780217
-------------------------------
-Estatisticas a respeito de Nq1:
-        \ esperança: 0.185187129284552
-        \ variancia: 0.30817943806365894
-        \ desvio padrão: 0.5551391159553243
-        \ intervalo de confiança para média: (0.18323701930579667, 0.18713710710987802), valor médio 0.0019500439020406768, precisão: 0.01053013028157438
-------------------------------
-Estatisticas a respeito de Nq2:
-        \ esperança: 1.5661825859243317
-        \ variancia: 5.834680807003215
-        \ desvio padrão: 2.4155083951423593
-        \ intervalo de confiança para média: (1.5420004176957947, 1.5903671286031442), valor médio 0.024183355453674782, precisão: 0.015440943692734093
+Estatisticas a respeito de W1:
+        \ esperança: 0.42728826731923114
+        \ variancia: 1.0453860170384024
+        \ desvio padrão: 1.0224412046853366
+        \ intervalo de confiança para média: (0.4221710298962791, 0.43240602161082486), valor médio 0.427288525753552, precisão: 0.011976675124256717
+        \ intervalo de confiança para variancia: (1.0166610361857598, 1.0714194839048718) valor médio 1.0440402600453158, precisão:0.0262242989157982     
 ------------------------------
 Estatisticas a respeito de N1:
-        \ esperança: 0.6185968657230009
-        \ variancia: 0.763595623641545
-        \ desvio padrão: 0.8738395869045674
-        \ intervalo de confiança para média: (0.616187662206673, 0.6210058252960203), valor médio 0.0024090815446736746, precisão: 0.0038944297217995663
+        \ esperança: 0.42805287683648496
+        \ variancia: 0.00030563064490489217
+        \ desvio padrão: 0.017482295184125342
+        \ intervalo de confiança para média: (0.4256151738392809, 0.43049057983368905), valor médio 0.42805287683648496, precisão: 0.005694864184116391   
+------------------------------
+Estatisticas a respeito de Nq1:
+        \ esperança: 0.12810853048734824
+        \ variancia: 0.0001394106389244882
+        \ desvio padrão: 0.011807228249021369
+        \ intervalo de confiança para média: (0.12646214965530236, 0.12975491131939412), valor médio 0.12810853048734824, precisão: 0.012851453574424328  
+------------------------------
+Estatisticas a respeito de T2:
+        \ esperança: 4.643232768548803
+        \ variancia: 27.76840720821034
+        \ desvio padrão: 5.269573721679045
+        \ intervalo de confiança para média: (4.5887080276895595, 4.697763695185042), valor médio 4.643235861437301, precisão: 0.011743498580505524
+------------------------------
+Estatisticas a respeito de W2:
+        \ esperança: 3.642244793016531
+        \ variancia: 25.920126320486833
+        \ desvio padrão: 5.091181230371478
+        \ intervalo de confiança para média: (3.588674400477554, 3.695820459790863), valor médio 3.6422474301342085, precisão: 0.014708783706844572
+        \ intervalo de confiança para variancia: (24.746688814862296, 26.798421086990096) valor médio 25.772554950926196, precisão:0.03980459593615236    
 ------------------------------
 Estatisticas a respeito de N2:
-        \ esperança: 1.9993222869607312
-        \ variancia: 6.289301356299437
-        \ desvio padrão: 2.507847953186045
-        \ intervalo de confiança para média: (1.9749370796183643, 2.023709968840893), valor médio 0.02438644461126438, precisão: 0.012197347910794411
+        \ esperança: 1.3925524280210617
+        \ desvio padrão: 0.13071460544434924
+        \ intervalo de confiança para média: (1.374325794612001, 1.4107790614301223), valor médio 1.3925524280210617, precisão: 0.013088651487945947      
 ------------------------------
-Estatisticas a respeito de N:
-        \ esperança: 2.617919152683732
-        \ variancia: 7.029756531854815
-        \ desvio padrão: 2.651368803439992
+Estatisticas a respeito de Nq2:
+        \ esperança: 1.0925529489786365
+        \ variancia: 0.01577999515439588
+        \ desvio padrão: 0.12561845069254707
+        \ intervalo de confiança para média: (1.0750369151551478, 1.1100689828021253), valor médio 1.0925529489786365, precisão: 0.01603220588975891      
 ------------------------------
 Estatisticas a respeito de rho:
-        \ esperança: 0.5999084558480154
-        \ variancia: 0.0001425018807880795
-        \ desvio padrão: 0.011937415163597163
+        \ esperança: 0.5999438253915621
+        \ variancia: 0.00018514897792136321
+        \ desvio padrão: 0.013606945943942132
 ------------------------------
 ```
 
@@ -375,186 +328,158 @@ Estatisticas a respeito de rho:
 
 Para $\rho = 0.8$
 
+```
+Soluções analíticas 
+
+W1: 0.6666666666666667
+T1: 1.6666666666666667
+W2 10.66666666666667
+T2 11.66666666666667
+Nq1: 0.264
+N1: 0.664
+Nq2: 4.266666666666668
+N2: 4.666666666666668
+```
+
+
+
 ````
-Estatisticas a respeito de W1:
-        \ esperança: 0.6636711085886786
-        \ variancia: 1.7790558734972948
-        \ desvio padrão: 1.3338125331159902
-        \ intervalo de confiança para média: (0.654426818814131, 0.672913802329541), valor médio 0.009243491757705002, precisão: 0.013927836774467978
-        \ intervalo de confiança para variancia: (0.16352566720618017, 0.1655975379521513) valor médio 0.0010359353729855608, precisão:0.006295122050037176
-------------------------------
-Estatisticas a respeito de W2:
-        \ esperança: 10.469308045739998
-        \ variancia: 155.2082801510165
-        \ desvio padrão: 12.458261522018892
-        \ intervalo de confiança para média: (10.17269436264265, 10.765906141784692), valor médio 0.29660588957102085, precisão: 0.02833101376649364
-        \ intervalo de confiança para variancia: (7471.049130475211, 7565.707347742277) valor médio 47.329108633533, precisão:0.006295122050037158        
-------------------------------
-Estatisticas a respeito de W:
-        \ esperança: 11.132979154328677
-        \ variancia: 165.17590288015722
-        \ desvio padrão: 12.8520777650992
-------------------------------
-Estatisticas a respeito de S1:
-        \ esperança: 1.00086963009365
-        \ variancia: 0.996165396474282
-        \ desvio padrão: 0.9980808566816027
-------------------------------
-Estatisticas a respeito de S2:
-        \ esperança: 1.0014678704528128
-        \ variancia: 1.0019509751852476
-        \ desvio padrão: 1.0009750122681622
-------------------------------
-Estatisticas a respeito de S:
-        \ esperança: 2.0023375005464623
-        \ variancia: 2.0000271941996886
-        \ desvio padrão: 1.414223176941917
-------------------------------
 Estatisticas a respeito de T1:
-        \ esperança: 1.664540738682329
-        \ variancia: 2.7749409847893474
-        \ desvio padrão: 1.6658154113794683
-        \ intervalo de confiança para média: (1.6535279725714964, 1.6755521308440826), valor médio 0.011012079136293096, precisão: 0.006615688895556999
+        \ esperança: 1.6678778462980837
+        \ variancia: 2.783915205176451
+        \ desvio padrão: 1.6685068789718702
+        \ intervalo de confiança para média: (1.6579729462554622, 1.6777827687324194), valor médio 1.6678778574939408, precisão: 0.005938631053811786
 ------------------------------
-Estatisticas a respeito de T2:
-        \ esperança: 11.470775916192814
-        \ variancia: 157.5657625414545
-        \ desvio padrão: 12.55252016694076
-        \ intervalo de confiança para média: (11.17368582201329, 11.767850180527038), valor médio 0.29708217925687386, precisão: 0.02589906615005881
-------------------------------
-Estatisticas a respeito de T:
-        \ esperança: 13.13531665487514
-        \ variancia: 169.79747513106523
-        \ desvio padrão: 13.030636021739891
-------------------------------
-Estatisticas a respeito de Nq1:
-        \ esperança: 0.30855172952756205
-        \ variancia: 0.6219815796752698
-        \ desvio padrão: 0.788658087941327
-        \ intervalo de confiança para média: (0.3047277041918162, 0.3123754160096803), valor médio 0.003823855908932028, precisão: 0.012392923593332222
-------------------------------
-Estatisticas a respeito de Nq2:
-        \ esperança: 4.881077228766769
-        \ variancia: 37.938442699027796
-        \ desvio padrão: 6.1594190228484855
-        \ intervalo de confiança para média: (4.747561795548828, 5.014587180456072), valor médio 0.13351269245362207, precisão: 0.027353135622452122
+Estatisticas a respeito de W1:
+        \ esperança: 0.665724435475754
+        \ variancia: 1.7787987384674362
+        \ desvio padrão: 1.3337161386394918
+        \ intervalo de confiança para média: (0.6577815637901692, 0.6736671539713406), valor médio 0.6657243588807549, precisão: 0.011931056727351069
+        \ intervalo de confiança para variancia: (1.7332850137461835, 1.8178227224076167) valor médio 1.7755538680769, precisão:0.02380601067119294
 ------------------------------
 Estatisticas a respeito de N1:
-        \ esperança: 0.7744735250565856
-        \ variancia: 1.2004017630402932
-        \ desvio padrão: 1.0956284785639214
-        \ intervalo de confiança para média: (0.770111614743027, 0.7788349444347101), valor médio 0.004361664845841551, precisão: 0.00563178221998434
+        \ esperança: 0.666455515142272
+        \ variancia: 0.0011302500353323778
+        \ desvio padrão: 0.033619191473507774
+        \ intervalo de confiança para média: (0.6617677093962069, 0.6711433208883371), valor médio 0.666455515142272, precisão: 0.007033936458706259      
+------------------------------
+Estatisticas a respeito de Nq1:
+        \ esperança: 0.2660865334218988
+        \ variancia: 0.0006077904850840902
+        \ desvio padrão: 0.024653407169884047
+        \ intervalo de confiança para média: (0.26264890215458725, 0.26952416468921037), valor médio 0.2660865334218988, precisão: 0.012919223017802834   
+------------------------------
+Estatisticas a respeito de T2:
+        \ esperança: 11.670774706435216
+        \ variancia: 175.15949349556234
+        \ desvio padrão: 13.234783469916021
+        \ intervalo de confiança para média: (11.356632756929447, 11.984908188479928), valor médio 11.670770472704687, precisão: 0.02691662187256087
+------------------------------
+Estatisticas a respeito de W2:
+        \ esperança: 10.672418307273777
+        \ variancia: 172.79146516201965
+        \ desvio padrão: 13.145016742553798
+        \ intervalo de confiança para média: (10.358966710552956, 10.985861954325003), valor médio 10.67241433243898, precisão: 0.029369888773273577
+        \ intervalo de confiança para variancia: (151.79902177530684, 183.67902717596522) valor médio 167.73902447563603, precisão:0.09502858830948109    
 ------------------------------
 Estatisticas a respeito de N2:
-        \ esperança: 5.3483258187196405
-        \ variancia: 38.52010628440496
-        \ desvio padrão: 6.206456822084961
-        \ intervalo de confiança para média: (5.214541574172389, 5.482104566625435), valor médio 0.1337814962265229, precisão: 0.0250137275676102
+        \ esperança: 4.670974530322657
+        \ desvio padrão: 0.9531335063226977
+        \ intervalo de confiança para média: (4.538071134022137, 4.803877926623177), valor médio 4.670974530322657, precisão: 0.02845303382361616
 ------------------------------
-Estatisticas a respeito de N:
-        \ esperança: 6.122799343776226
-        \ variancia: 40.171642579063146
-        \ desvio padrão: 6.3381103318783545
+Estatisticas a respeito de Nq2:
+        \ esperança: 4.272113258203035
+        \ variancia: 0.8967745961725733
+        \ desvio padrão: 0.9469818351861736
+        \ intervalo de confiança para média: (4.1400676409875485, 4.4041588754185215), valor médio 4.272113258203035, precisão: 0.03090873514693016       
 ------------------------------
 Estatisticas a respeito de rho:
-        \ esperança: 0.7998739509190008
-        \ variancia: 0.0002858805119800546
-        \ desvio padrão: 0.016908001418856535
+        \ esperança: 0.7992302538399959
+        \ variancia: 0.00036090054476696964
+        \ desvio padrão: 0.018997382576738556
+------------------------------
 ````
 
 
 
 Para $\rho = 0.9$
 
+```
+Soluções analíticas
+
+W1: 0.8181818181818181
+T1: 1.8181818181818181
+W2 25.363636363636367
+T2 26.363636363636367
+Nq1: 0.3645
+N1: 0.8145
+Nq2: 11.413636363636366
+N2: 11.863636363636365
+```
+
+
+
 ````
-Estatisticas a respeito de W1:
-        \ esperança: 0.8174345419915034
-        \ variancia: 2.266702791427239
-        \ desvio padrão: 1.5055573026049984
-        \ intervalo de confiança para média: (0.8068323623249047, 0.8280351589293462), valor médio 0.010601398302220733, precisão: 0.012969122163595819
-        \ intervalo de confiança para variancia: (0.1920874540455164, 0.1945212027254908) valor médio 0.0012168743399872117, precisão:0.00629512205003718 
-------------------------------
-Estatisticas a respeito de W2:
-        \ esperança: 25.545569914780753
-        \ variancia: 789.7460377739973
-        \ desvio padrão: 28.10242049671162
-        \ intervalo de confiança para média: (24.25603949975678, 26.83483357931457), valor médio 1.289397039778894, precisão: 0.05047465279300843
-        \ intervalo de confiança para variancia: (357041.7549716774, 361565.47519159433) valor médio 2261.8601099584776, precisão:0.00629512205003718     
-------------------------------
-Estatisticas a respeito de W:
-        \ esperança: 26.36300445677225
-        \ variancia: 805.0248375984473
-        \ desvio padrão: 28.37295962000523
-------------------------------
-Estatisticas a respeito de S1:
-        \ esperança: 1.0001071172472393
-        \ variancia: 0.996334601938094
-        \ desvio padrão: 0.9981656184912873
-------------------------------
-Estatisticas a respeito de S2:
-        \ esperança: 0.9994380210797946
-        \ variancia: 1.000838814586244
-        \ desvio padrão: 1.0004193193787512
-------------------------------
-Estatisticas a respeito de S:
-        \ esperança: 1.9995451383270337
-        \ variancia: 2.001098331106286
-        \ desvio padrão: 1.4146018277615389
-------------------------------
 Estatisticas a respeito de T1:
-        \ esperança: 1.8175416592387428
-        \ variancia: 3.258881580091405
-        \ desvio padrão: 1.805237264209723
-        \ intervalo de confiança para média: (1.8050776117195384, 1.8300039406877349), valor médio 0.012463164484098233, precisão: 0.006857158115665772
+        \ esperança: 1.8137254477085647
+        \ variancia: 3.2612591610412403
+        \ desvio padrão: 1.8058956672635438
+        \ intervalo de confiança para média: (1.802254901077593, 1.825194871510294), valor médio 1.8137248862939435, precisão: 0.0063239939546661525
 ------------------------------
-Estatisticas a respeito de T2:
-        \ esperança: 26.545007935860543
-        \ variancia: 792.4814000398567
-        \ desvio padrão: 28.15104616244051
-        \ intervalo de confiança para média: (25.254534135198377, 27.835214962765072), valor médio 1.2903404137833476, precisão: 0.04860977630172473
-------------------------------
-Estatisticas a respeito de T:
-        \ esperança: 28.362549595099274
-        \ variancia: 810.3375906962132
-        \ desvio padrão: 28.46642918766267
-------------------------------
-Estatisticas a respeito de Nq1:
-        \ esperança: 0.3946557495597
-        \ variancia: 0.8739796268174561
-        \ desvio padrão: 0.9348687751858311
-        \ intervalo de confiança para média: (0.39000208779811524, 0.39930884310882214), valor médio 0.004653377655353452, precisão: 0.011790987488306056
-------------------------------
-Estatisticas a respeito de Nq2:
-        \ esperança: 12.168836091769014
-        \ variancia: 190.1530029410127
-        \ desvio padrão: 13.789597635210852
-        \ intervalo de confiança para média: (11.60316222347459, 12.734391172972936), valor médio 0.5656144747491734, precisão: 0.04648079990092466
+Estatisticas a respeito de W1:
+        \ esperança: 0.8135322623390598
+        \ variancia: 2.263582338682241
+        \ desvio padrão: 1.5045206341829416
+        \ intervalo de confiança para média: (0.8036481481491278, 0.8234157580122241), valor médio 0.8135319530806759, precisão: 0.012149252274751174
+        \ intervalo de confiança para variancia: (2.1990980872639936, 2.3180229475169005) valor médio 2.258560517390447, precisão:0.02632757885768617     
 ------------------------------
 Estatisticas a respeito de N1:
-        \ esperança: 0.8775680278059648
-        \ variancia: 1.5318309214163992
-        \ desvio padrão: 1.237671572516877
-        \ intervalo de confiança para média: (0.8723674840015351, 0.8827679397862161), valor médio 0.0052002278923405365, precisão: 0.005925728376124897
+        \ esperança: 0.8153975799998017
+        \ variancia: 0.0018522487594576547
+        \ desvio padrão: 0.04303775969375793
+        \ intervalo de confiança para média: (0.8093964643171373, 0.821398695682466), valor médio 0.8153975799998017, precisão: 0.007359741836204407      
+------------------------------
+Estatisticas a respeito de Nq1:
+        \ esperança: 0.3658324246750498
+        \ variancia: 0.0011815501614175503
+        \ desvio padrão: 0.03437368414088822
+        \ intervalo de confiança para média: (0.36103941369035497, 0.3706254356597446), valor médio 0.3658324246750498, precisão: 0.013101657101478084    
+------------------------------
+Estatisticas a respeito de T2:
+        \ esperança: 25.529641973351307
+        \ variancia: 678.5456409648167
+        \ desvio padrão: 26.048908632893177
+        \ intervalo de confiança para média: (24.586025401054016, 26.473264149838975), valor médio 25.529644775446496, precisão: 0.03696171187231008
+------------------------------
+Estatisticas a respeito de W2:
+        \ esperança: 24.53078762835707
+        \ variancia: 675.8900098475694
+        \ desvio padrão: 25.99788471871451
+        \ intervalo de confiança para média: (23.58788096708892, 25.473700085170393), valor médio 24.530790526129657, precisão: 0.03843779751151392
+        \ intervalo de confiança para variancia: (579.1522522423685, 681.1762765314883) valor médio 630.1642643869284, precisão:0.08095034108953837       
 ------------------------------
 Estatisticas a respeito de N2:
-        \ esperança: 12.652318718872833
-        \ variancia: 190.81477036213863
-        \ desvio padrão: 13.81357196246281
-        \ intervalo de confiança para média: (12.086291210139686, 13.218227291269406), valor médio 0.5659680405648597, precisão: 0.044732567468797606
+        \ esperança: 11.504086347059555
+        \ variancia: 10.117211435611214
+        \ desvio padrão: 3.1807564250679765
+        \ intervalo de confiança para média: (11.060566809773336, 11.947605884345775), valor médio 11.504086347059555, precisão: 0.03855321699663554      
 ------------------------------
-Estatisticas a respeito de N:
-        \ esperança: 13.529886746678796
-        \ variancia: 193.27610446132127
-        \ desvio padrão: 13.90237765496684
+Estatisticas a respeito de Nq2:
+        \ esperança: 11.05513197472921
+        \ variancia: 10.073918642122567
+        \ desvio padrão: 3.1739437049391044
+        \ intervalo de confiança para média: (10.612562392131569, 11.497701557326852), valor médio 11.05513197472921, precisão: 0.040032953347757964      
 ------------------------------
 Estatisticas a respeito de rho:
-        \ esperança: 0.8974675244682351
-        \ variancia: 0.0003375086964232002
-        \ desvio padrão: 0.018371409756009476
+        \ esperança: 0.8985195276550982
+        \ variancia: 0.00036836911673367807
+        \ desvio padrão: 0.019192944451898935
 ------------------------------
 ````
 
 ​	Analisando os resultados obtidos é evidente o aumento de algumas métricas com o aumento da utilização do servidor, alinhado com o esperado, uma vez que mais tempo ocupado significa mais tempos de espera e mais pessoas no sistema. Em contra partida o tempo de serviço como independe do tempo ocupado permanece estável para todas as simulações.  Também observamos o aumento da variâncias e desvio padrão das métricas corroborando com nossa análise anterior.
+
+​	Também fica claro que todos os tempos estimados compactuam com os da solução analíticas e estão contidos nos intervalos de confiança estimados, comprovando a corretude e funcionamento das nossas simulações para esse cenário conhecido.
 
 ​	
 
@@ -578,98 +503,65 @@ Porém em função do controle do intervalo de confiança que perdia precisão c
 
 ![W2transiente0.6](C:\Users\Bruno Trotti\Documents\FACULDADE\AVALIAÇÃO E DESEMPENHO 2022.2\TRAB FINAL\img\W2transiente0.6.png)
 
-![Ntransiente0.6](C:\Users\Bruno Trotti\Documents\FACULDADE\AVALIAÇÃO E DESEMPENHO 2022.2\TRAB FINAL\img\Ntransiente0.6.png)
-
 
 
 Por fim simulando uma fila com $\rho=0.6$, 1500 coletas por rodada e e 100 rodadas obtemos os seguintes resultados 
 
 ```
-Estatisticas a respeito de W1:
-        \ esperança: 0.42089571167015155
-        \ variancia: 0.9746875898016587
-        \ desvio padrão: 0.9872626751790319
-        \ intervalo de confiança para média: (0.40777896369228517, 0.4340105643255536), valor médio 0.01311580031663423, precisão: 0.031161709382434337   
-        \ intervalo de confiança para variancia: (0.037361481785860094, 0.03832575155427039) valor médio 0.0004821348842051487, precisão:0.012740190463522035
-------------------------------
-Estatisticas a respeito de W2:
-        \ esperança: 3.6064031404971
-        \ variancia: 24.859175337619025
-        \ desvio padrão: 4.985897646123417
-        \ intervalo de confiança para média: (3.48686858333315, 3.7260138532130664), valor médio 0.11957263493995818, precisão: 0.033155298451589287      
-        \ intervalo de confiança para variancia: (55.192587972928045, 56.617064237752274) valor médio 0.7122381324121143, precisão:0.012740190463522068   
-------------------------------
-Estatisticas a respeito de W:
-        \ esperança: 4.0272988521672515
-        \ variancia: 28.99427764279719
-        \ desvio padrão: 5.384633473394191
-------------------------------
-Estatisticas a respeito de S1:
-        \ esperança: 0.9991936380826365
-        \ variancia: 0.9972750829963135
-        \ desvio padrão: 0.9986366120848532
-------------------------------
-Estatisticas a respeito de S2:
-        \ esperança: 0.9969067406974236
-        \ variancia: 0.9866056515703439
-        \ desvio padrão: 0.993280248253404
-------------------------------
-Estatisticas a respeito de S:
-        \ esperança: 1.99610037878006
-        \ variancia: 1.9827494311543574
-        \ desvio padrão: 1.4081013568469982
-------------------------------
 Estatisticas a respeito de T1:
-        \ esperança: 1.420089349752788
-        \ variancia: 1.9600417111618065
-        \ desvio padrão: 1.4000148967642474
-        \ intervalo de confiança para média: (1.4013366198072437, 1.4388357684826063), valor médio 0.01874957433768132, precisão: 0.013203124158932465    
+        \ esperança: 1.4363801801121192
+        \ variancia: 2.091920997847153
+        \ desvio padrão: 1.4463474678814745
+        \ intervalo de confiança para média: (1.4236437192310742, 1.4491223338871222), valor médio 1.4363830265590982, precisão: 0.008869018285840786     
 ------------------------------
-Estatisticas a respeito de T2:
-        \ esperança: 4.603309881194524
-        \ variancia: 26.71937228886702
-        \ desvio padrão: 5.169078475789183
-        \ intervalo de confiança para média: (4.481629396422371, 4.725069947333307), valor médio 0.12172027545546804, precisão: 0.02644167489579709       
-------------------------------
-Estatisticas a respeito de T:
-        \ esperança: 6.0233992309473114
-        \ variancia: 32.684049530837676
-        \ desvio padrão: 5.716996548086913
-------------------------------
-Estatisticas a respeito de Nq1:
-        \ esperança: 0.18424640803002376
-        \ variancia: 0.30632551801773217
-        \ desvio padrão: 0.5534668174495488
-        \ intervalo de confiança para média: (0.17907166375610992, 0.18942128018411572), valor médio 0.005174808214002902, precisão: 0.028086335432476142
-------------------------------
-Estatisticas a respeito de Nq2:
-        \ esperança: 1.560791454775599
-        \ variancia: 5.65104335663325
-        \ desvio padrão: 2.3771923263870027
-        \ intervalo de confiança para média: (1.5098581341430377, 1.6117583390859227), valor médio 0.05095010247144249, precisão: 0.03264340953374093     
+Estatisticas a respeito de W1:
+        \ esperança: 0.43229351231260765
+        \ variancia: 1.0789685917878795
+        \ desvio padrão: 1.0387341294998829
+        \ intervalo de confiança para média: (0.42222995448526385, 0.4423620092996388), valor médio 0.43229598189245133, precisão: 0.023285035782941322   
+        \ intervalo de confiança para variancia: (1.0190564042434713, 1.1337736537937546) valor médio 1.076415029018613, precisão:0.05328671862509811     
 ------------------------------
 Estatisticas a respeito de N1:
-        \ esperança: 0.6170016211054606
-        \ variancia: 0.7608292855784166
-        \ intervalo de confiança para média: (0.6106927915002315, 0.62331041007763), valor médio 0.0063088092886992575, precisão: 0.0102249480076429      
+        \ esperança: 0.4284801073862725
+        \ variancia: 0.0006192418330340846
+        \ desvio padrão: 0.02488457017981393
+        \ intervalo de confiança para média: (0.4235424687880931, 0.43341774598445193), valor médio 0.4284801073862725, precisão: 0.011523612212242474    
+------------------------------
+Estatisticas a respeito de Nq1:
+        \ esperança: 0.12905039428152523
+        \ variancia: 0.00027916143592844817
+        \ desvio padrão: 0.01670812484776338
+        \ intervalo de confiança para média: (0.1257351398264397, 0.13236564873661077), valor médio 0.12905039428152523, precisão: 0.025689611206094174   
+------------------------------
+Estatisticas a respeito de T2:
+        \ esperança: 4.541640391610515
+        \ variancia: 25.875150036188895
+        \ desvio padrão: 5.086762235075362
+        \ intervalo de confiança para média: (4.433563849282104, 4.649777281512257), valor médio 4.5416705653971805, precisão: 0.02380329320641129        
+------------------------------
+Estatisticas a respeito de W2:
+        \ esperança: 3.5419881913559372
+        \ variancia: 24.061328022824338
+        \ desvio padrão: 4.905234757157331
+        \ intervalo de confiança para média: (3.4352848256206356, 3.6487498125061815), valor médio 3.5420173190634086, precisão: 0.03013325001781625
+        \ intervalo de confiança para variancia: (21.981385353436604, 25.563827704275997) valor médio 23.7726065288563, precisão:0.07534811856854774      
 ------------------------------
 Estatisticas a respeito de N2:
-        \ esperança: 1.9942395238835469
-        \ variancia: 6.105516327252235
-        \ desvio padrão: 2.47093430249617
-        \ intervalo de confiança para média: (1.942445129742516, 2.0460684924523544), valor médio 0.0518116813549192, precisão: 0.025980445981983305      
+        \ esperança: 1.3567362700263212
+        \ variancia: 0.034760749120453134
+        \ desvio padrão: 0.18644234798042297
+        \ intervalo de confiança para média: (1.3197420632921377, 1.3937304767605048), valor médio 1.3567362700263212, precisão: 0.027267058124321994     
 ------------------------------
-Estatisticas a respeito de N:
-        \ esperança: 2.6112411449890076
-        \ variancia: 6.832078118016624
-        \ desvio padrão: 2.6138244237164483
-        \ intervalo de confiança para média: (2.5558521460889505, 2.666664677683781), valor médio 0.055406265797415255, precisão: 0.021218223958688914    
+Estatisticas a respeito de Nq2:
+        \ esperança: 1.058623419979999
+        \ variancia: 0.032122987635588796
+        \ desvio padrão: 0.17922886942562796
+        \ intervalo de confiança para média: (1.0230605238885924, 1.0941863160714058), valor médio 1.058623419979999, precisão: 0.03359352855813319       
 ------------------------------
 Estatisticas a respeito de rho:
-        \ esperança: 0.5974694868851606
-        \ variancia: 0.00029713749540638475
-        \ desvio padrão: 0.01723767662437095
-------------------------------
+        \ esperança: 0.5975425631510694
+        \ variancia: 0.000355710101681182
+        \ desvio padrão: 0.01886027840942922
 ```
 
 Obtendo assim o Fator Mínimo= 1500*50 + 320 = 75320 e levando 6.685999393463135 segundos para execução do programa em uma máquina Windows com Intel Core i3-9100F e 16Gb de ram.
